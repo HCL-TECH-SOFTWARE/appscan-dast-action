@@ -100,7 +100,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run ASoC DAST Scan
-        uses: antonychiu2/asoc-dast-action@v1.0.5
+        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.5
         with:
           baseurl:  https://cloud.appscan.com
           asoc_key: ${{secrets.ASOC_KEY}}
@@ -125,7 +125,7 @@ jobs:
 
 # Example 2 - DAST scan using a .scant template file with private network through appscan presence
 ```yaml
-name: "HCL AppScan DAST"
+name: "HCL AppScan DAST - scan template"
 on:
   workflow_dispatch
 jobs:
@@ -135,7 +135,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run ASoC DAST Scan
-        uses: antonychiu2/asoc-dast-action@v1.0.5
+        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.5
         with:
           baseurl:  https://cloud.appscan.com
           asoc_key: ${{secrets.ASOC_KEY}}
@@ -157,7 +157,7 @@ jobs:
 ```
 # Example 3 - DAST scan using ephemeral presence
 ```yaml
-name: "HCL AppScan DAST"
+name: "HCL AppScan DAST - ephemeral presence"
 on:
   workflow_dispatch
 jobs:
@@ -167,7 +167,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run ASoC DAST Scan
-        uses: antonychiu2/asoc-dast-action@v1.0.5
+        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.5
         
         with:
           baseurl:  https://cloud.appscan.com
