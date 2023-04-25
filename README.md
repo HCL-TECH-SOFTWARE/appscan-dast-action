@@ -90,7 +90,7 @@ If you don't have an account, register on [HCL AppScan on Cloud (ASoC)](https://
 
 # Example 1 - DAST scan with basic username and password login method, using the public network
 ```yaml
-name: "HCL AppScan DAST"
+name: "HCL AppScan DAST - basic"
 on:
   workflow_dispatch
 jobs:
