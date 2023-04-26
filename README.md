@@ -177,9 +177,6 @@ jobs:
           scan_type: 'staging'
           dynamic_scan_type: dast
           starting_URL: 'https://demo.testfire.net'
-          login_method: userpass
-          login_user: jsmith
-          login_password: demo1234
           ephemeral_presence: true
       - uses: actions/upload-artifact@v3
         name: Upload HCL AppScan HTML Report to Github Artifacts
