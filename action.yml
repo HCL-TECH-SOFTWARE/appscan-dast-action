@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: HCL AppScan Dynamic Analyzer
+name: HCL AppScan DAST Analyzer
 description: 'Scan for security issues in web applications'
 branding:
   icon: check-circle
