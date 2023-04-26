@@ -16,8 +16,9 @@ Write-Host "Starting ASoC script"
 
 #DEBUG - To show DEBUG Messages, set $DebugPreference = 'Continue'
 
-#$DebugPreference = 'Continue'
-$DebugPreference = 'SilentlyContinue'
+
+$DebugPreference = 'Continue'
+#$DebugPreference = 'SilentlyContinue'
 
 Write-Debug "Print environment variables:"
 Write-Host "github.sha: " $env:GITHUB_SHA
