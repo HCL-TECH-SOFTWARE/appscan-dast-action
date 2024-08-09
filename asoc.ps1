@@ -65,7 +65,7 @@ function Set-AppScanPresence{
 function Lookup-ASoC-Application ($ApplicationName) {
 
   $params = @{
-      Uri         = "$env:INPUT_BASEURL/Apps/GetAsPage"
+      Uri         = "$env:INPUT_BASEURL/Apps"
       Method      = 'GET'
       Headers = @{
           'Content-Type' = 'application/json'
@@ -90,7 +90,7 @@ function Run-ASoC-FileUpload($filepath){
       Authorization = "Bearer $global:BearerToken"
     }
      Form = @{
-    'fileToUpload' = Get-Item -Path $filepath
+    'uploadedFile' = Get-Item -Path $filepath
    }
   }
   $upload = Invoke-RestMethod @params
@@ -107,8 +107,8 @@ function Run-ASoC-DynamicAnalyzerNoAuth {
 function Run-ASoC-DynamicAnalyzerUserPass{
   Write-Host "Proceeding with username and password login..." -ForegroundColor Green
 
-  $global:jsonBodyInPSObject.Add("LoginUser",$env:INPUT_LOGIN_USER)
-  $global:jsonBodyInPSObject.Add("LoginPassword",$env:INPUT_LOGIN_PASSWORD)
+  $global:jsonBodyInPSObject.Add("UserName",$env:INPUT_LOGIN_USER)
+  $global:jsonBodyInPSObject.Add("Password",$env:INPUT_LOGIN_PASSWORD)
 
   return Run-ASoC-DynamicAnalyzerAPI($jsonBodyInPSObject | ConvertTo-Json)
 }
@@ -126,9 +126,9 @@ function Run-ASoC-DynamicAnalyzerRecordedLogin{
 function Run-ASoC-DynamicAnalyzerWithFile{
 
   $FileID = Run-ASoC-FileUpload($env:INPUT_SCAN_OR_SCANT_FILE)
-  $global:jsonBodyInPSObject.Add("ScanFileId",$FileID)
+  $global:jsonBodyInPSObject.Add("ScanOrTemplateFileId",$FileID)
 
-  return Run-ASoC-DynamicAnalyzerWithFileAPI($jsonBodyInPSObject | ConvertTo-Json)
+  return Run-ASoC-DynamicAnalyzerAPI($jsonBodyInPSObject | ConvertTo-Json)
 }
 
 
@@ -136,7 +136,7 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
 
   write-host $json
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Scans/DynamicAnalyzer"
+    Uri         = "$global:BaseAPIUrl/Scans/Dast"
     Method      = 'POST'
     Body        = $json
     Headers = @{
@@ -192,7 +192,7 @@ function Run-ASoC-DAST{
 function Run-ASoC-ScanCompletionChecker($scanID){
   $params = @{
     Uri         = "$global:BaseAPIUrl/Scans/$scanID/Executions"
-    Method      = 'Get'
+    Method      = 'GET'
     Headers = @{
       'Content-Type' = 'application/json'
       Authorization = "Bearer $global:BearerToken"
@@ -228,7 +228,7 @@ function Run-ASoC-GenerateReport ($scanID) {
 
   $params = @{
     Uri         = "$global:BaseAPIUrl/Reports/Security/Scan/$scanID"
-    Method      = 'Post'
+    Method      = 'POST'
     Headers = @{
       'Content-Type' = 'application/json'
       Authorization = "Bearer $global:BearerToken"
@@ -266,9 +266,10 @@ function Run-ASoC-GenerateReport ($scanID) {
 function Run-ASoC-ReportCompletionChecker($reportID){
 
   #Wait for report
+  #/api/v4/Reports $filter= Id eq <ReportId>
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Reports/$reportID"
-    Method      = 'Get'
+    Uri         = "$global:BaseAPIUrl/Reports" + "$filter= Id eq" + "$reportID"
+    Method      = 'GET'
     Headers = @{
       'Content-Type' = 'application/json'
       Authorization = "Bearer $global:BearerToken"
@@ -286,12 +287,13 @@ function Run-ASoC-ReportCompletionChecker($reportID){
   } 
 }
 
-function Run-ASoC-DownloadReport($eportID){
+function Run-ASoC-DownloadReport($reportID){
 
   #Download Report
+  #/api/v4/Reports/{ReportId}/Download
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Reports/Download/$eportID"
-    Method      = 'Get'
+    Uri         = "$global:BaseAPIUrl/Reports/$reportID/Download"
+    Method      = 'GET'
     Headers = @{
       'Accept' = 'text/html'
       Authorization = "Bearer $global:BearerToken"
@@ -308,8 +310,9 @@ function Run-ASoC-DownloadReport($eportID){
 function Run-ASoC-GetIssueCount($scanID, $policyScope){
     
   #/api/v2/Issues/CountBySeverity/{scope}/{scopeId}
+  #/api/v4/Issues/Scan/<scanID>?applyPolicies=all&$filter=status eq 'Open' or Status eq 'InProgress' or Status eq 'Reopened' or Status eq ‘New’ &$apply=groupby((Status,Severity),aggregate($count as N))
   $params = @{
-      Uri         = "$global:BaseAPIUrl/Issues/CountBySeverity/Scan/$scanID"+"?applyPolicies="+"$policyScope"
+      Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanID"+"?applyPolicies="+"$policyScope"+"&%24filter=Status%20eq%20%27Open%27%20or%20Status%20eq%20%27InProgress%27%20or%20Status%20eq%20%27Reopened%27%20or%20Status%20eq%20%27New%27&%24apply=groupby%28%28Status%2CSeverity%29%2Caggregate%28%24count%20as%20N%29%29""
       Method      = 'GET'
       Headers = @{
       'Content-Type' = 'application/json'
@@ -395,7 +398,7 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
   #Download Report
   $params = @{
     Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanId"+"?applyPolicies=None&%24inlinecount=allpages"
-    Method      = 'Get'
+    Method      = 'GET'
     Headers = @{
       'Accept' = 'text/html'
       Authorization = "Bearer $global:BearerToken"
@@ -412,7 +415,7 @@ function Run-ASoC-SetCommentForIssue($issueId,$inputComment){
   #Download Report
   $params = @{
     Uri         = "$global:BaseAPIUrl/Issues/$issueId"
-    Method      = 'Put'
+    Method      = 'PUT'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -430,13 +433,11 @@ function Run-ASoC-SetCommentForIssue($issueId,$inputComment){
 
 #DELETE
 function Run-ASoC-SetBatchComments($scanId, $inputComment){
-  
 
-  #https://cloud.appscan.com/api/v2/Issues/Scan/9d989c39-70bf-ed11-ba76-14cb65723612?odataFilter=test&applyPolicies=None
 
   $params = @{
     Uri         = "$global:BaseAPIUrl/Issues/Scan/$issueId"+"applyPolicies=None"
-    Method      = 'Put'
+    Method      = 'PUT'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -456,8 +457,8 @@ function Run-ASoC-GetScanDetails($scanId){
   #$latestScanExecutionId = ''
 
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Scans/$scanId"
-    Method      = 'Get'
+    Uri         = "$global:BaseAPIUrl/Scans/"+"?$filter=Id%20eq%20"+$scanId
+    Method      = 'GET'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -466,7 +467,9 @@ function Run-ASoC-GetScanDetails($scanId){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  $jsonOutput = Invoke-RestMethod @params
+  $response = Invoke-RestMethod @params
+  $array = $response.Items
+  $jsonOutput = $array[0]
   #$latestScanExecutionId = $jsonOutput.LatestExecution.Id
   return $jsonOutput
 
@@ -524,7 +527,7 @@ function Run-ASoC-CreatePresence($presenceName){
   #CREATE PRESENCE
   $params = @{
     Uri         = "$global:BaseAPIUrl/Presences"
-    Method      = 'Post'
+    Method      = 'POST'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -548,8 +551,8 @@ function Run-ASoC-DownloadPresence($presenceId, $OutputFileName, $platform){
 
   #DOWNLOAD PRESENCE ZIP FILE
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Presences/"+$presenceId+"/DownloadV2?platform="+$platform
-    Method      = 'Post'
+    Uri         = "$global:BaseAPIUrl/Presences/"+$presenceId+"/Download/"+$platform
+    Method      = 'GET'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -570,7 +573,7 @@ function Run-ASoC-DeletePresence($presenceId){
 
   $params = @{
     Uri         = "$global:BaseAPIUrl/Presences/"+$presenceId
-    Method      = 'Delete'
+    Method      = 'DELETE'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -600,7 +603,7 @@ function Run-ASoC-GetPresenceIdGivenPresenceName($presenceName){
 
   $params = @{
     Uri         = "$global:BaseAPIUrl/Presences/"
-    Method      = 'Get'
+    Method      = 'GET'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -610,8 +613,9 @@ function Run-ASoC-GetPresenceIdGivenPresenceName($presenceName){
   Write-Debug ($params | Format-Table | Out-String)
 
   $response = Invoke-RestMethod @params
+  $array = $response.Items
 
-  foreach($i in $response){
+  foreach($i in $array[i]){
     if($i.PresenceName -eq $presenceName){
       return $i.Id
     }
@@ -622,8 +626,8 @@ function Run-ASoC-CheckPresenceStatus($presenceId){
 
     #CREATE PRESENCE
     $params = @{
-      Uri         = "$global:BaseAPIUrl/Presences/"+$presenceId
-      Method      = 'Get'
+      Uri         = "$global:BaseAPIUrl/Presences/"+"$filter=Id eq "+$presenceId
+      Method      = 'GET'
       Headers = @{
         Authorization = "Bearer $global:BearerToken"
         'Content-Type' = 'application/json'
@@ -632,13 +636,15 @@ function Run-ASoC-CheckPresenceStatus($presenceId){
     #DEBUG
     Write-Debug ($params | Format-Table | Out-String)
   
-    $jsonOutput = Invoke-RestMethod @params
+    $response = Invoke-RestMethod @params
+    $array = $response.Items
+    $jsonOutput = $array[0]
     
     if($jsonOutput.Status -eq 'Active'){
       Write-Host "AppScan Presence with ID: $presenceId is in active state. "
       return $true
     }else{
-      Write-Host "AppScan Presence with ID:" $presenceId "is NOT yet in active state. State =" $jsonOutput.Status
+      Write-Host "AppScan Presence with ID:" $presenceId "is NOT yet in active state. State =" $array.Status
       return $false
     }
 }

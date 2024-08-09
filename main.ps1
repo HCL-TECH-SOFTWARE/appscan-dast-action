@@ -39,7 +39,7 @@ $global:jsonBodyInPSObject = ""
 $global:scanId = ""
 $env:scanId = ""
 $global:BaseAPIUrl = ""
-$global:BaseAPIUrl = $env:INPUT_BASEURL + "/api/V2"
+$global:BaseAPIUrl = $env:INPUT_BASEURL + "/api/v4"
 Write-Debug $global:BaseAPIUrl
 $global:ephemeralPresenceId = ""
 $global:GithubRunURL = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"

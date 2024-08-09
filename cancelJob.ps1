@@ -23,7 +23,7 @@ $DebugPreference = "SilentlyContinue"
 $scanidFileName = ".\scanid.txt"
 $ephemeralPresenceIdFileName =".\ephemeralPresenceId.txt"
 
-$global:BaseAPIUrl = $env:INPUT_BASEURL + "/api/V2"
+$global:BaseAPIUrl = $env:INPUT_BASEURL + "/api/v4"
 
 #LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1
 . "$env:GITHUB_ACTION_PATH/asoc.ps1"
