@@ -108,7 +108,6 @@ inputs:
   wait_for_analysis:
     description: 'Set this true to wait for analysis to complete before finishing job.'
     required: true
-    default: true
 
   wait_for_analysis_timeout_minutes:
     description: 'maximum duration in minutes before the job will no longer wait and proceeds to complete, default is 360 (6 hours)'
