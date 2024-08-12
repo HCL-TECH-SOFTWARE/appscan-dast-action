@@ -141,7 +141,7 @@ function Update-BooleanParameters($json){
 
 function Run-ASoC-DynamicAnalyzerAPI($json){
 
-  Update-BooleanParameters($json)
+  #Update-BooleanParameters($json)
   write-host $json
   $params = @{
     Uri         = "$global:BaseAPIUrl/Scans/Dast"
