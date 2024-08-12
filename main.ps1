@@ -57,12 +57,12 @@ $global:jsonBodyInPSObject = @{
   IncludeVerifiedDomains = $true
   #ScanConfiguration = $global:ScanConfigurationJSON
   ScanConfiguration = {
-    'Target' = @{
-      'StartingUrl' = "$env:INPUT_STARTING_URL"
+    "Target" = @{
+      "StartingUrl" = "$env:INPUT_STARTING_URL"
     }
 
-    'Tests' = @{
-      'TestOptimizationLevel' = "$env:INPUT_OPTIMIZATION"
+    "Tests" = @{
+      "TestOptimizationLevel" = "$env:INPUT_OPTIMIZATION"
     }
   }
   UseAutomaticTimeout = $true
