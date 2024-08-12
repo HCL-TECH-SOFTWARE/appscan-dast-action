@@ -58,11 +58,11 @@ $global:jsonBodyInPSObject = @{
   #ScanConfiguration = $global:ScanConfigurationJSON
   ScanConfiguration = {
     "Target" = @{
-      "StartingUrl" = "$env:INPUT_STARTING_URL"
+      "StartingUrl" = $env:INPUT_STARTING_URL
     }
 
     "Tests" = @{
-      "TestOptimizationLevel" = "$env:INPUT_OPTIMIZATION"
+      "TestOptimizationLevel" = $env:INPUT_OPTIMIZATION
     }
   }
   UseAutomaticTimeout = $true
