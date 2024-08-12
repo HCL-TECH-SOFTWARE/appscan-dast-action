@@ -107,8 +107,8 @@ function Run-ASoC-DynamicAnalyzerNoAuth {
 function Run-ASoC-DynamicAnalyzerUserPass{
   Write-Host "Proceeding with username and password login..." -ForegroundColor Green
 
-  $global:LoginJSON.Add("UserName",$env:INPUT_LOGIN_USER)
-  $global:LoginJSON.Add("Password",$env:INPUT_LOGIN_PASSWORD)
+  $global:jsonBodyInPSObject.ScanConfiguration.Login.Add("UserName",$env:INPUT_LOGIN_USER)
+  $global:jsonBodyInPSObject.ScanConfiguration.Login.Add("Password",$env:INPUT_LOGIN_PASSWORD)
 
   return Run-ASoC-DynamicAnalyzerAPI($jsonBodyInPSObject | ConvertTo-Json)
 }
@@ -418,10 +418,10 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
   return $jsonIssues
 }
 
-function Run-ASoC-SetCommentForIssue($issueId,$inputComment){
+function Run-ASoC-SetCommentForIssue($scanId, $issueId,$inputComment){
   #Download Report
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Issues/$issueId"
+    Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanId"+"?odataFilter=Id%20eq%20"+$issueId
     Method      = 'PUT'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
