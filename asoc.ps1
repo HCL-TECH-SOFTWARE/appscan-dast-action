@@ -131,6 +131,13 @@ function Run-ASoC-DynamicAnalyzerWithFile{
   return Run-ASoC-DynamicAnalyzerAPI($jsonBodyInPSObject | ConvertTo-Json)
 }
 
+function Update-BooleanParameters($json){
+
+  $json.Add("EnableMailNotification", $env:INPUT_EMAIL_NOTIFICATION)
+  $json.Add("Personal", $env:INPUT_PERSONAL_SCAN)
+
+}
+
 
 function Run-ASoC-DynamicAnalyzerAPI($json){
 

@@ -95,12 +95,10 @@ inputs:
   email_notification:
     description: 'Send email notification upon scan completion'
     required: false
-    default: false
 
   personal_scan:
     description: 'set to personal scan'
     required: false
-    default: false
   #intervention:
   #  description: 'allow scan intervention'
   #  required: false
