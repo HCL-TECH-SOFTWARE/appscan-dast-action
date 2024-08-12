@@ -57,7 +57,7 @@ $global:jsonBodyInPSObject = @{
   IncludeVerifiedDomains = $true
   #ScanConfiguration = $global:ScanConfigurationJSON
   'ScanConfiguration' = {
-    'Target' = @{
+    Target = @{
       'StartingUrl' = $env:INPUT_STARTING_URL
     }
 
