@@ -70,10 +70,9 @@ $global:jsonBodyInPSObject = @{
 }
 
 $global:ScanConfigurationJSON = @{
-  Target = TargetJSON
-  Login = LoginJSON
-  Tests = TestsJSON
-
+  Target = $global.TargetJSON
+  Login = $global.LoginJSON
+  Tests = $global.TestsJSON
 }
 
 $global:TargetJSON = @{
@@ -81,7 +80,6 @@ $global:TargetJSON = @{
 }
 
 $global:LoginJSON = @{
-
 }
 
 $global:TestsJSON = @{
