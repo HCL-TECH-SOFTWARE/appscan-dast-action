@@ -55,19 +55,37 @@ $global:ephemeralPresenceName = "Github Runner $env:RUNNER_TRACKING_ID"
 $global:jsonBodyInPSObject = @{
   ScanType = $env:INPUT_SCAN_TYPE
   IncludeVerifiedDomains = $true
-  StartingUrl = $env:INPUT_STARTING_URL
-  TestOptimizationLevel = $env:INPUT_OPTIMIZATION
+  ScanConfiguration = $global.ScanConfigurationJSON
   UseAutomaticTimeout = $true
   MaxRequestsIn = 10
   MaxRequestsTimeFrame = 1000
   OnlyFullResults = $true
   FullyAutomatic = $true
   ScanName = $global:scan_name
-  #EnableMailNotification = $env:INPUT_EMAIL_NOTIFICATION
+  EnableMailNotification = $env:INPUT_EMAIL_NOTIFICATION
   Locale = 'en-US'
   AppId = $env:INPUT_APPLICATION_ID
   Execute = $true
-  #Personal = $env:INPUT_PERSONAL_SCAN
+  Personal = $env:INPUT_PERSONAL_SCAN
+}
+
+$global:ScanConfigurationJSON = @{
+  Target = TargetJSON
+  Login = LoginJSON
+  Tests = TestsJSON
+
+}
+
+$global:TargetJSON = @{
+  StartingUrl = $env:INPUT_STARTING_URL
+}
+
+$global:LoginJSON = @{
+
+}
+
+$global:TestsJSON = @{
+  TestOptimizationLevel = $env:INPUT_OPTIMIZATION
 }
 
 #LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1
