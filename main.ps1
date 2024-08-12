@@ -56,7 +56,7 @@ $global:jsonBodyInPSObject = @{
   ScanType = $env:INPUT_SCAN_TYPE
   IncludeVerifiedDomains = $true
   #ScanConfiguration = $global:ScanConfigurationJSON
-  ScanConfiguration = {
+  ScanConfiguration = @{
     Target = @{
       'StartingUrl' = $env:INPUT_STARTING_URL
     }
@@ -76,16 +76,17 @@ $global:jsonBodyInPSObject = @{
   AppId = $env:INPUT_APPLICATION_ID
   Execute = $true
   #Personal = $env:INPUT_PERSONAL_SCAN
+  'Target' = $global:TargetJSON
+  'Login' = $global:LoginJSON
+  'Tests' = $global:TestsJSON
+  Configuration = $global:ScanConfigurationJSON
+}
+
+$global:ScanConfigurationJSON = @{
   Target = $global:TargetJSON
   Login = $global:LoginJSON
   Tests = $global:TestsJSON
 }
-
-#$global:ScanConfigurationJSON = @{
-  #Target = $global.TargetJSON
-  #Login = $global.LoginJSON
-  #Tests = $global.TestsJSON
-#}
 
 $global:TargetJSON = @{
   StartingUrl = $env:INPUT_STARTING_URL
@@ -95,7 +96,7 @@ $global:LoginJSON = @{
 }
 
 $global:TestsJSON = @{
-  'TestOptimizationLevel' = $env:INPUT_OPTIMIZATION
+  TestOptimizationLevel = $env:INPUT_OPTIMIZATION
 }
 
 #LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1
