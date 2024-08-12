@@ -61,7 +61,7 @@ $global:jsonBodyInPSObject = @{
       'StartingUrl' = $env:INPUT_STARTING_URL
     }
 
-    'Tests' = @{
+    Tests = @{
       'TestOptimizationLevel' = $env:INPUT_OPTIMIZATION
     }
   }
