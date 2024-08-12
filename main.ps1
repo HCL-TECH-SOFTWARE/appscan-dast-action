@@ -76,9 +76,9 @@ $global:jsonBodyInPSObject = @{
   AppId = $env:INPUT_APPLICATION_ID
   Execute = $true
   #Personal = $env:INPUT_PERSONAL_SCAN
-  Target = $global.TargetJSON
-  Login = $global.LoginJSON
-  Tests = $global.TestsJSON
+  Target = $global:TargetJSON
+  Login = $global:LoginJSON
+  Tests = $global:TestsJSON
 }
 
 #$global:ScanConfigurationJSON = @{
