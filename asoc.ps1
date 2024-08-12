@@ -131,14 +131,6 @@ function Run-ASoC-DynamicAnalyzerWithFile{
   return Run-ASoC-DynamicAnalyzerAPI($jsonBodyInPSObject | ConvertTo-Json)
 }
 
-function Update-BooleanParameters($json){
-
-  $json.Add("EnableMailNotification", $env:INPUT_EMAIL_NOTIFICATION)
-  $json.Add("Personal", $env:INPUT_PERSONAL_SCAN)
-
-}
-
-
 function Run-ASoC-DynamicAnalyzerAPI($json){
 
   #Update-BooleanParameters($json)
@@ -404,7 +396,7 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
 
   #Download Report
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanId"+"?applyPolicies=None&%24inlinecount=allpages"
+    Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanId"+"?applyPolicies=None"
     Method      = 'GET'
     Headers = @{
       'Accept' = 'text/html'
@@ -421,7 +413,7 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
 function Run-ASoC-SetCommentForIssue($scanId, $issueId,$inputComment){
   #Download Report
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanId"+"?odataFilter=Id%20eq%20"+$issueId
+    Uri         = "$global:BaseAPIUrl/Issues/Scan/"+ $scanId + "?odatafilter=Id eq" $issueId
     Method      = 'PUT'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
@@ -464,7 +456,7 @@ function Run-ASoC-GetScanDetails($scanId){
   #$latestScanExecutionId = ''
 
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Scans/"+"?$filter=Id%20eq%20"+$scanId
+    Uri         = "$global:BaseAPIUrl/Scans/"+"?$filter=Id eq "+$scanId
     Method      = 'GET'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
