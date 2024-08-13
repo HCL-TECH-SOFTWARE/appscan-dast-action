@@ -107,8 +107,11 @@ function Run-ASoC-DynamicAnalyzerNoAuth {
 function Run-ASoC-DynamicAnalyzerUserPass{
   Write-Host "Proceeding with username and password login..." -ForegroundColor Green
 
-  $global:jsonBodyInPSObject.ScanConfiguration.Login.Add("UserName",$env:INPUT_LOGIN_USER)
-  $global:jsonBodyInPSObject.ScanConfiguration.Login.Add("Password",$env:INPUT_LOGIN_PASSWORD)
+  $Login = @{
+     'Username' = $env:INPUT_LOGIN_USER
+     'Password' = $env:INPUT_LOGIN_PASSWORD
+  }
+  $global:jsonBodyInPSObject.ScanConfiguration.Add($Login)
 
   return Run-ASoC-DynamicAnalyzerAPI($jsonBodyInPSObject | ConvertTo-Json)
 }
