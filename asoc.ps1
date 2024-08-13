@@ -111,7 +111,7 @@ function Run-ASoC-DynamicAnalyzerUserPass{
      'Username' = $env:INPUT_LOGIN_USER
      'Password' = $env:INPUT_LOGIN_PASSWORD
   }
-  $global:jsonBodyInPSObject.ScanConfiguration.Add($Login)
+  $global:jsonBodyInPSObject.ScanConfiguration.Add('Login', $Login)
 
   return Run-ASoC-DynamicAnalyzerAPI($jsonBodyInPSObject | ConvertTo-Json)
 }
