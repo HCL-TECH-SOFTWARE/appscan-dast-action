@@ -238,7 +238,7 @@ function Run-ASoC-GenerateReport ($scanID) {
   Write-Debug ($params | Format-Table | Out-String)
   Write-Debug ($body | Format-Table | Out-String)
 
-  $output_runreport = Invoke-RestMethod @params -Body ($body | ConvertTo-Json)
+  $output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-Json)
   $report_ID = $output_runreport.Id
   return $report_ID
 }

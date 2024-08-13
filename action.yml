@@ -97,21 +97,21 @@ inputs:
     required: false
     default: 'false'
 
-
   personal_scan:
     description: 'set to personal scan'
     required: false
     default: 'false'
-    
+
   #intervention:
   #  description: 'allow scan intervention'
   #  required: false
-  #  default: false
+  #  default: 'false'
 
   #Wait for analysis settings
   wait_for_analysis:
     description: 'Set this true to wait for analysis to complete before finishing job.'
     required: true
+    default: 'true'
 
   wait_for_analysis_timeout_minutes:
     description: 'maximum duration in minutes before the job will no longer wait and proceeds to complete, default is 360 (6 hours)'
