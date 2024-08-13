@@ -133,7 +133,6 @@ function Run-ASoC-DynamicAnalyzerWithFile{
 
 function Run-ASoC-DynamicAnalyzerAPI($json){
 
-  #Update-BooleanParameters($json)
   write-host $json
   $params = @{
     Uri         = "$global:BaseAPIUrl/Scans/Dast"
@@ -148,25 +147,6 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
   
-  $Members = Invoke-RestMethod @params
-  return $Members.Id
-}
-
-function Run-ASoC-DynamicAnalyzerWithFileAPI($json){
-
-  Write-Debug ($json | Format-Table | Out-String)
-  $params = @{
-    Uri         = "$global:BaseAPIUrl/Scans/DynamicAnalyzerWithFile"
-    Method      = 'POST'
-    Body        = $json
-    Headers = @{
-        'Content-Type' = 'application/json'
-        Authorization = "Bearer $global:BearerToken"
-      }
-    }
-  #DEBUG
-  Write-Debug ($params | Format-Table | Out-String)
-
   $Members = Invoke-RestMethod @params
   return $Members.Id
 }
@@ -236,29 +216,29 @@ function Run-ASoC-GenerateReport ($scanID) {
   }
   $body = @{
     'Configuration' = @{
-      'Summary' = true
-      'Details' = true
-      'Discussion' = true
-      'Overview' = true
-      'TableOfContent' = true
-      'Advisories' = true
-      'FixRecommendation' = true
-      'History' = true
-      'Coverage' = true
-      'MinimizeDetails' = true
-      'Articles' = true
+      'Summary' = $true
+      'Details' = $true
+      'Discussion' = $true
+      'Overview' = $true
+      'TableOfContent' = $true
+      'Advisories' = $true
+      'FixRecommendation' = $true
+      'History' = $true
+      'Coverage' = $true
+      'MinimizeDetails' = $true
+      'Articles' = $true
       'ReportFileType' = "HTML"
       'Title' = "$global:scan_name"
       'Locale' = "en-US"
       'Notes' = "Github SHA: $env:GITHUB_SHA"
-      'Comments' = true
+      'Comments' = $true
     }
   }
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
   Write-Debug ($body | Format-Table | Out-String)
 
-  $output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-JSON)
+  $output_runreport = Invoke-RestMethod @params -Body ($body | ConvertTo-Json)
   $report_ID = $output_runreport.Id
   return $report_ID
 }
