@@ -413,7 +413,7 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
 function Run-ASoC-SetCommentForIssue($scanId, $issueId,$inputComment){
   #Download Report
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Issues/Scan/"+ $scanId + "?odatafilter=Id eq" $issueId
+    Uri         = "$global:BaseAPIUrl/Issues/Scan/"+$scanId+"?odatafilter=Id eq"+$issueId
     Method      = 'PUT'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
