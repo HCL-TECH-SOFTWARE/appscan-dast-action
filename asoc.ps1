@@ -248,7 +248,7 @@ function Run-ASoC-ReportCompletionChecker($reportID){
   #Wait for report
   #/api/v4/Reports $filter= Id eq <ReportId>
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Reports" + "$filter= Id eq" + "$reportID"
+    Uri         = "$global:BaseAPIUrl/Reports" + "$filter=Id%20eq%20" + $reportID
     Method      = 'GET'
     Headers = @{
       'Content-Type' = 'application/json'
@@ -581,7 +581,7 @@ function Run-ASoC-DeletePresence($presenceId){
 function Run-ASoC-GetPresenceIdGivenPresenceName($presenceName){
 
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Presences/"
+    Uri         = "$global:BaseAPIUrl/Presences"
     Method      = 'GET'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
