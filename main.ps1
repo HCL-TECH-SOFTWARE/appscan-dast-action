@@ -60,10 +60,6 @@ $global:jsonBodyInPSObject = @{
       'StartingUrl' = $env:INPUT_STARTING_URL
     }
 
-    Login = @{
-      'ExtraField' = 'check'
-    }
-
     Tests = @{
       'TestOptimizationLevel' = $env:INPUT_OPTIMIZATION
     }
