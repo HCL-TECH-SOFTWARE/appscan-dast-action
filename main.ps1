@@ -73,11 +73,9 @@ $global:jsonBodyInPSObject = @{
   OnlyFullResults = $true
   FullyAutomatic = $true
   ScanName = $global:scan_name
-  EnableMailNotification = $env:INPUT_EMAIL_NOTIFICATION
   Locale = 'en-US'
-  AppId = $($env:INPUT_APPLICATION_ID)
+  AppId = $env:INPUT_APPLICATION_ID
   Execute = $true
-  Personal = $($env:INPUT_PERSONAL_SCAN)
 }
 
 #LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1

@@ -133,7 +133,8 @@ function Run-ASoC-DynamicAnalyzerWithFile{
 
 function Run-ASoC-DynamicAnalyzerAPI($json){
 
-  write-host $json
+  $body = updating-BooleanParameters($json)
+  write-host $body
   $params = @{
     Uri         = "$global:BaseAPIUrl/Scans/Dast"
     Method      = 'POST'
@@ -149,6 +150,14 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
   
   $Members = Invoke-RestMethod @params
   return $Members.Id
+}
+
+function updating-BooleanParameters($json) {
+
+  $json.Add("EnableMailNotification", $env:INPUT_EMAIL_NOTIFICATION)
+  $json.Add("Personal", $env:INPUT_PERSONAL_SCAN)
+
+  return $json
 }
 
 function Run-ASoC-DAST{
