@@ -308,7 +308,7 @@ function Run-ASoC-GetIssueCount($scanID, $policyScope){
   #DEBUG
   #$jsonOutput
 
-  return $jsonOutput
+  return $jsonOutput.Items
 
 }
 
