@@ -236,22 +236,22 @@ function Run-ASoC-GenerateReport ($scanID) {
   }
   $body = @{
     'Configuration' = @{
-      'Summary' = "true"
-      'Details' = "true"
-      'Discussion' = "true"
-      'Overview' = "true"
-      'TableOfContent' = "true"
-      'Advisories' = "true"
-      'FixRecommendation' = "true"
-      'History' = "true"
-      'Coverage' = "true"
-      'MinimizeDetails' = "true"
-      'Articles' = "true"
+      'Summary' = true
+      'Details' = true
+      'Discussion' = true
+      'Overview' = true
+      'TableOfContent' = true
+      'Advisories' = true
+      'FixRecommendation' = true
+      'History' = true
+      'Coverage' = true
+      'MinimizeDetails' = true
+      'Articles' = true
       'ReportFileType' = "HTML"
       'Title' = "$global:scan_name"
       'Locale' = "en-US"
       'Notes' = "Github SHA: $env:GITHUB_SHA"
-      'Comments' = "true"
+      'Comments' = true
     }
   }
   #DEBUG
@@ -427,7 +427,7 @@ function Run-ASoC-SetCommentForIssue($scanId, $issueId, $inputComment){
   #Write-Debug ($params | Format-Table | Out-String)
 
   $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) 
-  return $jsonOutput
+  return "Done"
 }
 
 #DELETE
