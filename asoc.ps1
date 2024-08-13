@@ -410,10 +410,10 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
   return $jsonIssues
 }
 
-function Run-ASoC-SetCommentForIssue($scanId, $issueId,$inputComment){
+function Run-ASoC-SetCommentForIssue($scanId, $issueId, $inputComment){
   #Download Report
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Issues/Scan/"+$scanId+"?odatafilter=Id eq"+$issueId
+    Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanId"+"?odataFilter=Id%20eq%20"+$issueId
     Method      = 'PUT'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
@@ -435,7 +435,7 @@ function Run-ASoC-SetBatchComments($scanId, $inputComment){
 
 
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Issues/Scan/$issueId"+"applyPolicies=None"
+    Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanId"+"applyPolicies=None"
     Method      = 'PUT'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
