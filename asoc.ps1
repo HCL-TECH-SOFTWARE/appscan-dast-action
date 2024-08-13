@@ -154,8 +154,8 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
 
 function updating-BooleanParameters($json) {
 
-  $json.Add("EnableMailNotification", $env:INPUT_EMAIL_NOTIFICATION)
-  $json.Add("Personal", $env:INPUT_PERSONAL_SCAN)
+  $json.Append("EnableMailNotification",$env:INPUT_EMAIL_NOTIFICATION)
+  $json.Append("Personal",$env:INPUT_PERSONAL_SCAN)
 
   return $json
 }
