@@ -137,7 +137,7 @@ if($env:INPUT_WAIT_FOR_ANALYSIS -eq $true){
   foreach($i in $issueItems){
     $issueId = $i.Id
     Write-Host "Writing Comments for Issue ID: $issueId"
-    Run-ASoC-SetCommentForIssue $issueId "Issue found during Scan from Github SHA: $env:GITHUB_SHA, URL: $global:GithubRunURL"
+    Run-ASoC-SetCommentForIssue $scanId $issueId "Issue found during Scan from Github SHA: $env:GITHUB_SHA, URL: $global:GithubRunURL"
   }
 
   #Send for report generation
