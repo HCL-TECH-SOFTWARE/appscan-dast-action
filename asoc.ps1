@@ -260,7 +260,8 @@ function Run-ASoC-ReportCompletionChecker($reportID){
 
   $report_status ="Not Ready"
   while($report_status -ne "Ready"){
-    $output = Invoke-RestMethod @params
+    $json = Invoke-RestMethod @params
+    $output = $json.Items[0]
     $report_status = $output.Status
     Start-Sleep -Seconds 5
     Write-Host "Generating Report... Progress: " $output.Progress "%"
@@ -436,7 +437,7 @@ function Run-ASoC-GetScanDetails($scanId){
   #$latestScanExecutionId = ''
 
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Scans/"+"?$filter=Id eq "+$scanId
+    Uri         = "$global:BaseAPIUrl/Scans/"+"?%24filter=Id%20eq%20"+$scanId
     Method      = 'GET'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
