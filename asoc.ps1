@@ -248,7 +248,7 @@ function Run-ASoC-ReportCompletionChecker($reportID){
   #Wait for report
   #/api/v4/Reports $filter= Id eq <ReportId>
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Reports" + "$filter=Id%20eq%20" + $reportID
+    Uri         = "$global:BaseAPIUrl/Reports" + "?%24filter=Id%20eq%20" + $reportID
     Method      = 'GET'
     Headers = @{
       'Content-Type' = 'application/json'
