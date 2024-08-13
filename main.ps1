@@ -61,6 +61,7 @@ $global:jsonBodyInPSObject = @{
     }
 
     Login = @{
+      'ExtraField' = 'check'
     }
 
     Tests = @{
