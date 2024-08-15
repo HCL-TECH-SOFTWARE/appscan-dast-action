@@ -47,7 +47,6 @@ Write-Host "Gitub Run URL: $global:GithubRunURL"
 $scanidFileName = ".\scanid.txt"
 $ephemeralPresenceIdFileName =".\ephemeralPresenceId.txt"
 $global:ephemeralPresenceName = "Github Runner $env:RUNNER_TRACKING_ID"
-#$osDetails = Get-OSInfo
 
 #${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
@@ -75,7 +74,7 @@ $global:jsonBodyInPSObject = @{
   AppId = $env:INPUT_APPLICATION_ID
   Execute = $true
   Personal = [System.Convert]::ToBoolean($env:INPUT_PERSONAL_SCAN)
-  ClientType = "DastGithubAction-"+"-$env:GITHUB_ACTION_REF"
+  ClientType = "DastGithubAction-"+"$env:OS"+ "-$env:GITHUB_ACTION_REF"
 }
 
 #LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1
