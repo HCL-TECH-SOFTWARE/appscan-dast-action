@@ -136,7 +136,7 @@ function Run-ASoC-DynamicAnalyzerWithFile{
 
 function Run-ASoC-DynamicAnalyzerAPI($json){
 
-  write-host $body
+  write-host $json
   $params = @{
     Uri         = "$global:BaseAPIUrl/Scans/Dast"
     Method      = 'POST'

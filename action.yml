@@ -34,10 +34,6 @@ inputs:
   scan_name:
     description: 'The name of the scan created in ASoC.'
     required: false
-  scan_type:
-    description: 'The type of scan - staging or production'
-    required: false
-    default: 'staging'
   
   #dast or scan file
   dynamic_scan_type: 

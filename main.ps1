@@ -53,7 +53,6 @@ $global:ephemeralPresenceName = "Github Runner $env:RUNNER_TRACKING_ID"
 #INITIALIZE
 #Construct base JSON Body for DAST Scan for API DynamicAnalyzer and DynamicAnalyzerWithFiles
 $global:jsonBodyInPSObject = @{
-  ScanType = $env:INPUT_SCAN_TYPE
   IncludeVerifiedDomains = $true
   ScanConfiguration = @{
     Target = @{
