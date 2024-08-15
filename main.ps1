@@ -74,6 +74,7 @@ $global:jsonBodyInPSObject = @{
   AppId = $env:INPUT_APPLICATION_ID
   Execute = $true
   Personal = [System.Convert]::ToBoolean($env:INPUT_PERSONAL_SCAN)
+  ClientType = "DastGithubAction-" +$Get-OSInfo.Name+ "-$env:GITHUB_ACTION_REF"
 }
 
 #LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1
