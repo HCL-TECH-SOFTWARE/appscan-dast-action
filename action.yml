@@ -1,4 +1,4 @@
-# Copyright 2023, 2024 HCL America
+# Copyright 2023 HCL America
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,6 +34,10 @@ inputs:
   scan_name:
     description: 'The name of the scan created in ASoC.'
     required: false
+  #scan_type:
+  # description: 'The type of scan - staging or production'
+  # required: false
+  # default: 'staging'
   
   #dast or scan file
   dynamic_scan_type: 
