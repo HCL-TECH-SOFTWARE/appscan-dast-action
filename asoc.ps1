@@ -129,7 +129,7 @@ function Run-ASoC-DynamicAnalyzerRecordedLogin{
 function Run-ASoC-DynamicAnalyzerWithFile{
 
   $FileID = Run-ASoC-FileUpload($env:INPUT_SCAN_OR_SCANT_FILE)
-  $global:jsonBodyInPSObject.Delete('ScanConfiguration')
+  $global:jsonBodyInPSObject.Remove('ScanConfiguration')
   $global:jsonBodyInPSObject.Add("ScanOrTemplateFileId",$FileID)
 
   return Run-ASoC-DynamicAnalyzerAPI($jsonBodyInPSObject | ConvertTo-Json)
