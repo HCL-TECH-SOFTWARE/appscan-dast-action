@@ -651,8 +651,9 @@ function Create-EphemeralPresenceWithDocker{
 
   #CREATE A NEW PRESENCE
   $presenceId = Run-ASoC-CreatePresence($presenceName)
+  Write-Host "$presenceId"
   $output = Run-ASoC-DownloadPresence $presenceId $presenceFileName $platform
-  Write-Host $output
+  Write-Host "$output"
       Write-Host "Checkpoint-0"
 
 

@@ -1,5 +1,6 @@
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
 LABEL description="AppScan Presence in Dockerfile for Linux Image"
+RUN echo "Inside dockerfile"
 RUN microdnf update && \
     microdnf install unzip && \
     microdnf clean all
