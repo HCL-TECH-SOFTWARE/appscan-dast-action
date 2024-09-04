@@ -666,7 +666,8 @@ function Create-EphemeralPresenceWithDocker{
     Write-Host "Checkpoint-1"
   }
   
-  docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName
+      Write-Host "Checkpoint-4"
+  docker build -f $GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .
       Write-Host "Checkpoint-2"
   docker run --name $dockerContainerName -d $dockerImageName --debug
       Write-Host "Checkpoint-3"
