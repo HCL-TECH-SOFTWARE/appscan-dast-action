@@ -664,8 +664,8 @@ function Create-EphemeralPresenceWithDocker{
     docker rm $dockerContainerName
   }
   
-  docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .
-  docker run --name $dockerContainerName -d $dockerImageName
+  docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName --debug
+  docker run --name $dockerContainerName -d $dockerImageName --debug
 
   #Pause for 5 seconds for the commands to complete
   Start-Sleep -Seconds 5
