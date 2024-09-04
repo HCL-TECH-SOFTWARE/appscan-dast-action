@@ -652,6 +652,7 @@ function Create-EphemeralPresenceWithDocker{
   #CREATE A NEW PRESENCE
   $presenceId = Run-ASoC-CreatePresence($presenceName)
   $output = Run-ASoC-DownloadPresence $presenceId $presenceFileName $platform
+      Write-Host "Checkpoint-0"
 
 
   $dockerContainerName = 'appscanpresence_container'
@@ -662,10 +663,13 @@ function Create-EphemeralPresenceWithDocker{
   if ((docker ps -a --format '{{.Names}}') -contains $dockerContainerName) {
     docker stop $dockerContainerName
     docker rm $dockerContainerName
+    Write-Host "Checkpoint-1"
   }
   
-  docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName --debug
+  docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName
+      Write-Host "Checkpoint-2"
   docker run --name $dockerContainerName -d $dockerImageName --debug
+      Write-Host "Checkpoint-3"
 
   #Pause for 5 seconds for the commands to complete
   Start-Sleep -Seconds 5
