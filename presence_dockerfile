@@ -1,15 +1,10 @@
-FROM registry.access.redhat.com/ubi8/ubi:latest
+FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
 LABEL description="AppScan Presence in Dockerfile for Linux Image"
-#ENV APIKEYID d3e35642-b9cc-17c4-e39c-5d9caf6ba088
-#ENV APIKEYSECRET vZiRxhopqA5Uybj0eoFJneTEQeGERmMQQEfxfdCPufw=
-#ENV PRESENCEID 8f2c5776-e2d3-ed11-800f-14cb65723612
-RUN yum install -y unzip && yum clean all
-#RUN curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"KeyId":"'"${APIKEYID}"'","KeySecret":"'"${APIKEYSECRET}"'"}' 'https://cloud.appscan.com/api/V2/Account/ApiKeyLogin' > /root/output.txt
-#RUN curl -X POST --header 'Accept: application/zip' --header 'Content-Length: 0' --header "Authorization: Bearer $(grep -oP '(?<="Token":")[^"]*' /root/output.txt)" https://cloud.appscan.com/api/v2/Presences/$PRESENCEID/Download/Linux_x86_64/v2 > /root/AppScanPresence-Linux_x86_64.zip
-#RUN ls
+RUN microdnf update && \
+    microdnf install unzip && \
+    microdnf clean all
 COPY presence.zip /root
 RUN mkdir /root/presence/ && unzip /root/presence.zip -d /root/presence/
 RUN chmod +x /root/presence/startPresence.sh
 ENTRYPOINT  ["/root/presence/startPresence.sh"]
-#ENTRYPOINT  ["sh","/root/AppScanPresence/startPresence.sh"]
-#ENTRYPOINT ["/bin/sh"]
+
