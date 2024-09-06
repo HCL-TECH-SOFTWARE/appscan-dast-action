@@ -549,7 +549,6 @@ function Run-ASoC-DownloadPresence($presenceId, $OutputFileName, $platform){
   $ProgressPreference = 'SilentlyContinue'
   $jsonOutput = Invoke-WebRequest @params -OutFile $OutputFileName
   Write-Host "Inside DownloadPresence method but after response"
-  Write-Host (ConvertFrom-JSON $jsonOutput)
   $ProgressPreference = 'Continue'
   
   return $jsonOutput
@@ -655,7 +654,7 @@ function Create-EphemeralPresenceWithDocker{
   #CREATE A NEW PRESENCE
   $presenceId = Run-ASoC-CreatePresence($presenceName)
   Write-Host "$presenceId"
-  $output = Run-ASoC-DownloadPresence $presenceId $presenceFileName $platform --debug
+  $output = Run-ASoC-DownloadPresence $presenceId $presenceFileName $platform
   Write-Host $output
       Write-Host "Checkpoint-0"
 
@@ -676,7 +675,7 @@ function Create-EphemeralPresenceWithDocker{
       Write-Host $dockerImageName
   docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .
       Write-Host "Checkpoint-3"
-  docker run --name $dockerContainerName -d $dockerImageName --debug
+  docker run --name $dockerContainerName -d $dockerImageName
       Write-Host "Checkpoint-4"
 
   #Pause for 5 seconds for the commands to complete
