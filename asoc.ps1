@@ -661,7 +661,7 @@ function Create-EphemeralPresenceWithDocker{
 
   $dockerContainerName = 'appscanpresence_container'
   $dockerImageName = 'appscanpresence_image'
-  $dockerfileName = 'presence_dockerfile'
+  $dockerfileName = 'dockerfile'
 
   #Start presence in a container
   if ((docker ps -a --format '{{.Names}}') -contains $dockerContainerName) {
