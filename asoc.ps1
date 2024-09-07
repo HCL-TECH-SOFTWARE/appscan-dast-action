@@ -661,7 +661,7 @@ function Create-EphemeralPresenceWithDocker{
 
   $dockerContainerName = 'appscanpresence_container'
   $dockerImageName = 'appscanpresence_image'
-  $dockerfileName = 'dockerfile'
+  $dockerfileName = 'Dockerfile'
 
   #Start presence in a container
   if ((docker ps -a --format '{{.Names}}') -contains $dockerContainerName) {
@@ -673,7 +673,7 @@ function Create-EphemeralPresenceWithDocker{
       Write-Host "Checkpoint-2"
       Write-Host $env:GITHUB_ACTION_PATH/$dockerfileName
       Write-Host $dockerImageName
-  docker buildx build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .
+  docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .
       Write-Host "Checkpoint-3"
   docker run --name $dockerContainerName -d $dockerImageName
       Write-Host "Checkpoint-4"
