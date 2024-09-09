@@ -294,9 +294,9 @@ function Run-ASoC-DownloadReport($reportID){
 #policies options are 'All' or 'None'
 function Run-ASoC-GetIssueCount($scanID, $policyScope){
 
-  #/api/v4/Issues/Scan/<scanID>?applyPolicies=all&$filter=status eq 'Open' or Status eq 'InProgress' or Status eq 'Reopened' or Status eq ‘New’ &$apply=groupby((Status,Severity),aggregate($count as N))
+  #/api/v4/Issues/Scan/<scanID>?applyPolicies=all&$filter=status eq 'Open' or Status eq 'InProgress' or Status eq 'Reopened' &$apply=groupby((Status,Severity),aggregate($count as N))
   $params = @{
-      Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanID"+"?applyPolicies="+"$policyScope"+"&%24filter=Status%20eq%20%27Open%27%20or%20Status%20eq%20%27InProgress%27%20or%20Status%20eq%20%27Reopened%27%20or%20Status%20eq%20%27New%27&%24apply=groupby%28%28Status%2CSeverity%29%2Caggregate%28%24count%20as%20N%29%29"
+      Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanID"+"?applyPolicies="+"$policyScope"+"&%24filter=Status%20eq%20%27Open%27%20or%20Status%20eq%20%27InProgress%27%20or%20Status%20eq%20%27Reopened%27&%24apply=groupby%28%28Status%2CSeverity%29%2Caggregate%28%24count%20as%20N%29%29"
       Method      = 'GET'
       Headers = @{
       'Content-Type' = 'application/json'
@@ -651,9 +651,7 @@ function Create-EphemeralPresenceWithDocker{
 
   #CREATE A NEW PRESENCE
   $presenceId = Run-ASoC-CreatePresence($presenceName)
-  Write-Host "$presenceId"
   $output = Run-ASoC-DownloadPresence $presenceId $presenceFileName $platform
-  Write-Host $output
 
 
   $dockerContainerName = 'appscanpresence_container'
