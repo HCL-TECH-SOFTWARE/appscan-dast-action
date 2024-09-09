@@ -543,12 +543,10 @@ function Run-ASoC-DownloadPresence($presenceId, $OutputFileName, $platform){
     }
   }
   #DEBUG
-  Write-Host "Inside DownloadPresence method"
   Write-Debug ($params | Format-Table | Out-String)
 
   $ProgressPreference = 'SilentlyContinue'
   $jsonOutput = Invoke-WebRequest @params -OutFile $OutputFileName
-  Write-Host "Inside DownloadPresence method but after response"
   $ProgressPreference = 'Continue'
   
   return $jsonOutput
@@ -656,7 +654,6 @@ function Create-EphemeralPresenceWithDocker{
   Write-Host "$presenceId"
   $output = Run-ASoC-DownloadPresence $presenceId $presenceFileName $platform
   Write-Host $output
-      Write-Host "Checkpoint-0"
 
 
   $dockerContainerName = 'appscanpresence_container'
@@ -667,16 +664,10 @@ function Create-EphemeralPresenceWithDocker{
   if ((docker ps -a --format '{{.Names}}') -contains $dockerContainerName) {
     docker stop $dockerContainerName
     docker rm $dockerContainerName
-    Write-Host "Checkpoint-1"
   }
-  
-      Write-Host "Checkpoint-2"
-      Write-Host $env:GITHUB_ACTION_PATH/$dockerfileName
-      Write-Host $dockerImageName
-  docker buildx build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .
-      Write-Host "Checkpoint-3"
+
+  docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .
   docker run --name $dockerContainerName -d $dockerImageName
-      Write-Host "Checkpoint-4"
 
   #Pause for 5 seconds for the commands to complete
   Start-Sleep -Seconds 5
