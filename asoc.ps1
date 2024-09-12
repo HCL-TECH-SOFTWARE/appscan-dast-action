@@ -653,7 +653,6 @@ function Create-EphemeralPresenceWithDocker{
   $presenceId = Run-ASoC-CreatePresence($presenceName)
   $output = Run-ASoC-DownloadPresence $presenceId $presenceFileName $platform
 
-
   $dockerContainerName = 'appscanpresence_container'
   $dockerImageName = 'appscanpresence_image'
   $dockerfileName = 'Dockerfile'
@@ -664,7 +663,10 @@ function Create-EphemeralPresenceWithDocker{
     docker rm $dockerContainerName
   }
 
+  Write-Host "Creating docker image..."
   docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .
+  
+  Write-Host "Starting container..."
   docker run --name $dockerContainerName -d $dockerImageName
 
   #Pause for 5 seconds for the commands to complete
