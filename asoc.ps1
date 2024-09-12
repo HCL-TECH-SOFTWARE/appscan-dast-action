@@ -1,4 +1,4 @@
-# Copyright 2023 HCL America
+# Copyright 2023, 2024 HCL America
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+$Os = 'linux'
+if($IsMacOS){
+  $Os = 'mac'
+}elseif($IsWindows){
+  $Os = 'win'
+}
+
+$ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
+
 Write-Host "Loading Library functions from asoc.ps1"
+
 #FUNCTIONS
 function Login-ASoC {
 
@@ -28,6 +38,7 @@ function Login-ASoC {
       Headers = @{
           'Content-Type' = 'application/json'
           'accept' = 'application/json'
+          'ClientType' = "$ClientType"
         }
       }
   #DEBUG
@@ -144,6 +155,7 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
     Body        = $json
     Headers = @{
         'Content-Type' = 'application/json'
+        'ClientType' = "$ClientType"
         Authorization = "Bearer $global:BearerToken"
       }
     }
