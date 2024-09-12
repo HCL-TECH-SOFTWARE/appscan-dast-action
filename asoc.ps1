@@ -610,7 +610,7 @@ function Run-ASoC-CheckPresenceStatus($presenceId){
 
     #CREATE PRESENCE
     $params = @{
-      Uri         = "$global:BaseAPIUrl/Presences/"+"$filter=Id eq "+$presenceId
+      Uri         = "$global:BaseAPIUrl/Presences?$filter=Id eq "+$presenceId
       Method      = 'GET'
       Headers = @{
         Authorization = "Bearer $global:BearerToken"
