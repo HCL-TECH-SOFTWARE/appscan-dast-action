@@ -664,7 +664,7 @@ function Create-EphemeralPresenceWithDocker{
   }
 
   Write-Host "Creating docker image..."
-  docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .
+  (docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .) > $null
   
   Write-Host "Starting container..."
   docker run --name $dockerContainerName -d $dockerImageName
