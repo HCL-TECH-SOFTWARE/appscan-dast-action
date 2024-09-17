@@ -1,4 +1,4 @@
-# Copyright 2023 HCL America
+# Copyright 2023, 2024 HCL America
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,13 @@
 # limitations under the License.
 
 Write-Host "Starting ASoC script"
+
+$Os = 'linux'
+if($IsMacOS){
+  $Os = 'mac'
+}elseif($IsWindows){
+  $Os = 'win'
+}
 
 #DEBUG - To show DEBUG Messages, set $DebugPreference = 'Continue'
 
@@ -74,6 +81,7 @@ $global:jsonBodyInPSObject = @{
   AppId = $env:INPUT_APPLICATION_ID
   Execute = $true
   Personal = [System.Convert]::ToBoolean($env:INPUT_PERSONAL_SCAN)
+  ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
 }
 
 #LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1

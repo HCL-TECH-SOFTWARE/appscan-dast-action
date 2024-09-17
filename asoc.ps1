@@ -1,4 +1,4 @@
-# Copyright 2023 HCL America
+# Copyright 2023, 2024 HCL America
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+$Os = 'linux'
+if($IsMacOS){
+  $Os = 'mac'
+}elseif($IsWindows){
+  $Os = 'win'
+}
+
+$ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
+
 Write-Host "Loading Library functions from asoc.ps1"
+
 #FUNCTIONS
 function Login-ASoC {
 
@@ -28,6 +38,7 @@ function Login-ASoC {
       Headers = @{
           'Content-Type' = 'application/json'
           'accept' = 'application/json'
+          'ClientType' = "$ClientType"
         }
       }
   #DEBUG
@@ -144,6 +155,7 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
     Body        = $json
     Headers = @{
         'Content-Type' = 'application/json'
+        'ClientType' = "$ClientType"
         Authorization = "Bearer $global:BearerToken"
       }
     }
@@ -610,7 +622,7 @@ function Run-ASoC-CheckPresenceStatus($presenceId){
 
     #CREATE PRESENCE
     $params = @{
-      Uri         = "$global:BaseAPIUrl/Presences/"+"$filter=Id eq "+$presenceId
+      Uri         = "$global:BaseAPIUrl/Presences?%24filter=Id%20eq%20"+$presenceId
       Method      = 'GET'
       Headers = @{
         Authorization = "Bearer $global:BearerToken"
@@ -653,10 +665,9 @@ function Create-EphemeralPresenceWithDocker{
   $presenceId = Run-ASoC-CreatePresence($presenceName)
   $output = Run-ASoC-DownloadPresence $presenceId $presenceFileName $platform
 
-
   $dockerContainerName = 'appscanpresence_container'
   $dockerImageName = 'appscanpresence_image'
-  $dockerfileName = 'Dockerfile'
+  $dockerfileName = 'dockerfile'
 
   #Start presence in a container
   if ((docker ps -a --format '{{.Names}}') -contains $dockerContainerName) {
@@ -664,7 +675,10 @@ function Create-EphemeralPresenceWithDocker{
     docker rm $dockerContainerName
   }
 
-  docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .
+  Write-Host "Creating docker image..."
+  (docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .) 2>&1
+  
+  Write-Host "Starting container..."
   docker run --name $dockerContainerName -d $dockerImageName
 
   #Pause for 5 seconds for the commands to complete
