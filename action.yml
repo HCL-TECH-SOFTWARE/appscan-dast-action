@@ -132,7 +132,7 @@ inputs:
     default: 'High'
 
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'main.js'
   post: 'cancelJob.js'
   post-if: cancelled()
