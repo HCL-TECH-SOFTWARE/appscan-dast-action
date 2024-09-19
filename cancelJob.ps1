@@ -1,4 +1,4 @@
-# Copyright 2023 HCL America
+# Copyright 2023, 2024 HCL America
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ $DebugPreference = "SilentlyContinue"
 $scanidFileName = ".\scanid.txt"
 $ephemeralPresenceIdFileName =".\ephemeralPresenceId.txt"
 
-$global:BaseAPIUrl = $env:INPUT_BASEURL + "/api/V2"
+$global:BaseAPIUrl = $env:INPUT_BASEURL + "/api/v4"
 
 #LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1
 . "$env:GITHUB_ACTION_PATH/asoc.ps1"

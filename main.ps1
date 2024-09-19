@@ -1,4 +1,4 @@
-# Copyright 2023 HCL America
+# Copyright 2023, 2024 HCL America
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,13 @@
 # limitations under the License.
 
 Write-Host "Starting ASoC script"
+
+$Os = 'linux'
+if($IsMacOS){
+  $Os = 'mac'
+}elseif($IsWindows){
+  $Os = 'win'
+}
 
 #DEBUG - To show DEBUG Messages, set $DebugPreference = 'Continue'
 
@@ -39,7 +46,7 @@ $global:jsonBodyInPSObject = ""
 $global:scanId = ""
 $env:scanId = ""
 $global:BaseAPIUrl = ""
-$global:BaseAPIUrl = $env:INPUT_BASEURL + "/api/V2"
+$global:BaseAPIUrl = $env:INPUT_BASEURL + "/api/v4"
 Write-Debug $global:BaseAPIUrl
 $global:ephemeralPresenceId = ""
 $global:GithubRunURL = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
@@ -53,21 +60,28 @@ $global:ephemeralPresenceName = "Github Runner $env:RUNNER_TRACKING_ID"
 #INITIALIZE
 #Construct base JSON Body for DAST Scan for API DynamicAnalyzer and DynamicAnalyzerWithFiles
 $global:jsonBodyInPSObject = @{
-  ScanType = $env:INPUT_SCAN_TYPE
   IncludeVerifiedDomains = $true
-  StartingUrl = $env:INPUT_STARTING_URL
-  TestOptimizationLevel = $env:INPUT_OPTIMIZATION
+  ScanConfiguration = @{
+    Target = @{
+      'StartingUrl' = $env:INPUT_STARTING_URL
+    }
+
+    Tests = @{
+      'TestOptimizationLevel' = $env:INPUT_OPTIMIZATION
+    }
+  }
   UseAutomaticTimeout = $true
   MaxRequestsIn = 10
   MaxRequestsTimeFrame = 1000
   OnlyFullResults = $true
   FullyAutomatic = $true
   ScanName = $global:scan_name
-  EnableMailNotification = $env:INPUT_EMAIL_NOTIFICATION
+  EnableMailNotification = [System.Convert]::ToBoolean($env:INPUT_EMAIL_NOTIFICATION)
   Locale = 'en-US'
   AppId = $env:INPUT_APPLICATION_ID
   Execute = $true
-  Personal = $env:INPUT_PERSONAL_SCAN
+  Personal = [System.Convert]::ToBoolean($env:INPUT_PERSONAL_SCAN)
+  ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
 }
 
 #LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1
@@ -126,7 +140,7 @@ if($env:INPUT_WAIT_FOR_ANALYSIS -eq $true){
   foreach($i in $issueItems){
     $issueId = $i.Id
     Write-Host "Writing Comments for Issue ID: $issueId"
-    Run-ASoC-SetCommentForIssue $issueId "Issue found during Scan from Github SHA: $env:GITHUB_SHA, URL: $global:GithubRunURL"
+    Run-ASoC-SetCommentForIssue $scanId $issueId "Issue found during Scan from Github SHA: $env:GITHUB_SHA, URL: $global:GithubRunURL"
   }
 
   #Send for report generation

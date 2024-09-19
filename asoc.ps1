@@ -1,4 +1,4 @@
-# Copyright 2023 HCL America
+# Copyright 2023, 2024 HCL America
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+$Os = 'linux'
+if($IsMacOS){
+  $Os = 'mac'
+}elseif($IsWindows){
+  $Os = 'win'
+}
+
+$ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
+
 Write-Host "Loading Library functions from asoc.ps1"
+
 #FUNCTIONS
 function Login-ASoC {
 
@@ -28,6 +38,7 @@ function Login-ASoC {
       Headers = @{
           'Content-Type' = 'application/json'
           'accept' = 'application/json'
+          'ClientType' = "$ClientType"
         }
       }
   #DEBUG
@@ -65,7 +76,7 @@ function Set-AppScanPresence{
 function Lookup-ASoC-Application ($ApplicationName) {
 
   $params = @{
-      Uri         = "$env:INPUT_BASEURL/Apps/GetAsPage"
+      Uri         = "$env:INPUT_BASEURL/Apps"
       Method      = 'GET'
       Headers = @{
           'Content-Type' = 'application/json'
@@ -90,7 +101,7 @@ function Run-ASoC-FileUpload($filepath){
       Authorization = "Bearer $global:BearerToken"
     }
      Form = @{
-    'fileToUpload' = Get-Item -Path $filepath
+    'uploadedFile' = Get-Item -Path $filepath
    }
   }
   $upload = Invoke-RestMethod @params
@@ -107,8 +118,11 @@ function Run-ASoC-DynamicAnalyzerNoAuth {
 function Run-ASoC-DynamicAnalyzerUserPass{
   Write-Host "Proceeding with username and password login..." -ForegroundColor Green
 
-  $global:jsonBodyInPSObject.Add("LoginUser",$env:INPUT_LOGIN_USER)
-  $global:jsonBodyInPSObject.Add("LoginPassword",$env:INPUT_LOGIN_PASSWORD)
+  $Login = @{
+     'Username' = $env:INPUT_LOGIN_USER
+     'Password' = $env:INPUT_LOGIN_PASSWORD
+  }
+  $global:jsonBodyInPSObject.ScanConfiguration.Add('Login', $Login)
 
   return Run-ASoC-DynamicAnalyzerAPI($jsonBodyInPSObject | ConvertTo-Json)
 }
@@ -126,21 +140,22 @@ function Run-ASoC-DynamicAnalyzerRecordedLogin{
 function Run-ASoC-DynamicAnalyzerWithFile{
 
   $FileID = Run-ASoC-FileUpload($env:INPUT_SCAN_OR_SCANT_FILE)
-  $global:jsonBodyInPSObject.Add("ScanFileId",$FileID)
+  $global:jsonBodyInPSObject.Remove('ScanConfiguration')
+  $global:jsonBodyInPSObject.Add("ScanOrTemplateFileId",$FileID)
 
-  return Run-ASoC-DynamicAnalyzerWithFileAPI($jsonBodyInPSObject | ConvertTo-Json)
+  return Run-ASoC-DynamicAnalyzerAPI($jsonBodyInPSObject | ConvertTo-Json)
 }
-
 
 function Run-ASoC-DynamicAnalyzerAPI($json){
 
   write-host $json
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Scans/DynamicAnalyzer"
+    Uri         = "$global:BaseAPIUrl/Scans/Dast"
     Method      = 'POST'
     Body        = $json
     Headers = @{
         'Content-Type' = 'application/json'
+        'ClientType' = "$ClientType"
         Authorization = "Bearer $global:BearerToken"
       }
     }
@@ -148,25 +163,6 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
   
-  $Members = Invoke-RestMethod @params
-  return $Members.Id
-}
-
-function Run-ASoC-DynamicAnalyzerWithFileAPI($json){
-
-  Write-Debug ($json | Format-Table | Out-String)
-  $params = @{
-    Uri         = "$global:BaseAPIUrl/Scans/DynamicAnalyzerWithFile"
-    Method      = 'POST'
-    Body        = $json
-    Headers = @{
-        'Content-Type' = 'application/json'
-        Authorization = "Bearer $global:BearerToken"
-      }
-    }
-  #DEBUG
-  Write-Debug ($params | Format-Table | Out-String)
-
   $Members = Invoke-RestMethod @params
   return $Members.Id
 }
@@ -192,7 +188,7 @@ function Run-ASoC-DAST{
 function Run-ASoC-ScanCompletionChecker($scanID){
   $params = @{
     Uri         = "$global:BaseAPIUrl/Scans/$scanID/Executions"
-    Method      = 'Get'
+    Method      = 'GET'
     Headers = @{
       'Content-Type' = 'application/json'
       Authorization = "Bearer $global:BearerToken"
@@ -228,7 +224,7 @@ function Run-ASoC-GenerateReport ($scanID) {
 
   $params = @{
     Uri         = "$global:BaseAPIUrl/Reports/Security/Scan/$scanID"
-    Method      = 'Post'
+    Method      = 'POST'
     Headers = @{
       'Content-Type' = 'application/json'
       Authorization = "Bearer $global:BearerToken"
@@ -236,29 +232,29 @@ function Run-ASoC-GenerateReport ($scanID) {
   }
   $body = @{
     'Configuration' = @{
-      'Summary' = "true"
-      'Details' = "true"
-      'Discussion' = "true"
-      'Overview' = "true"
-      'TableOfContent' = "true"
-      'Advisories' = "true"
-      'FixRecommendation' = "true"
-      'History' = "true"
-      'Coverage' = "true"
-      'MinimizeDetails' = "true"
-      'Articles' = "true"
+      'Summary' = $true
+      'Details' = $true
+      'Discussion' = $true
+      'Overview' = $true
+      'TableOfContent' = $true
+      'Advisories' = $true
+      'FixRecommendation' = $true
+      'History' = $true
+      'Coverage' = $true
+      'MinimizeDetails' = $true
+      'Articles' = $true
       'ReportFileType' = "HTML"
       'Title' = "$global:scan_name"
       'Locale' = "en-US"
       'Notes' = "Github SHA: $env:GITHUB_SHA"
-      'Comments' = "true"
+      'Comments' = $true
     }
   }
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
   Write-Debug ($body | Format-Table | Out-String)
 
-  $output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-JSON)
+  $output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-Json)
   $report_ID = $output_runreport.Id
   return $report_ID
 }
@@ -266,9 +262,10 @@ function Run-ASoC-GenerateReport ($scanID) {
 function Run-ASoC-ReportCompletionChecker($reportID){
 
   #Wait for report
+  #/api/v4/Reports $filter= Id eq <ReportId>
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Reports/$reportID"
-    Method      = 'Get'
+    Uri         = "$global:BaseAPIUrl/Reports" + "?%24filter=Id%20eq%20" + $reportID
+    Method      = 'GET'
     Headers = @{
       'Content-Type' = 'application/json'
       Authorization = "Bearer $global:BearerToken"
@@ -279,19 +276,21 @@ function Run-ASoC-ReportCompletionChecker($reportID){
 
   $report_status ="Not Ready"
   while($report_status -ne "Ready"){
-    $output = Invoke-RestMethod @params
+    $json = Invoke-RestMethod @params
+    $output = $json.Items[0]
     $report_status = $output.Status
     Start-Sleep -Seconds 5
     Write-Host "Generating Report... Progress: " $output.Progress "%"
   } 
 }
 
-function Run-ASoC-DownloadReport($eportID){
+function Run-ASoC-DownloadReport($reportID){
 
   #Download Report
+  #/api/v4/Reports/{ReportId}/Download
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Reports/Download/$eportID"
-    Method      = 'Get'
+    Uri         = "$global:BaseAPIUrl/Reports/$reportID/Download"
+    Method      = 'GET'
     Headers = @{
       'Accept' = 'text/html'
       Authorization = "Bearer $global:BearerToken"
@@ -306,10 +305,10 @@ function Run-ASoC-DownloadReport($eportID){
 }
 #policies options are 'All' or 'None'
 function Run-ASoC-GetIssueCount($scanID, $policyScope){
-    
-  #/api/v2/Issues/CountBySeverity/{scope}/{scopeId}
+
+  #/api/v4/Issues/Scan/<scanID>?applyPolicies=all&$filter=status eq 'Open' or Status eq 'InProgress' or Status eq 'Reopened' &$apply=groupby((Status,Severity),aggregate($count as N))
   $params = @{
-      Uri         = "$global:BaseAPIUrl/Issues/CountBySeverity/Scan/$scanID"+"?applyPolicies="+"$policyScope"
+      Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanID"+"?applyPolicies="+"$policyScope"+"&%24filter=Status%20eq%20%27Open%27%20or%20Status%20eq%20%27InProgress%27%20or%20Status%20eq%20%27Reopened%27&%24apply=groupby%28%28Status%2CSeverity%29%2Caggregate%28%24count%20as%20N%29%29"
       Method      = 'GET'
       Headers = @{
       'Content-Type' = 'application/json'
@@ -325,7 +324,7 @@ function Run-ASoC-GetIssueCount($scanID, $policyScope){
   #DEBUG
   #$jsonOutput
 
-  return $jsonOutput
+  return $jsonOutput.Items
 
 }
 
@@ -394,8 +393,8 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
 
   #Download Report
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanId"+"?applyPolicies=None&%24inlinecount=allpages"
-    Method      = 'Get'
+    Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanId"+"?applyPolicies=None"
+    Method      = 'GET'
     Headers = @{
       'Accept' = 'text/html'
       Authorization = "Bearer $global:BearerToken"
@@ -408,11 +407,11 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
   return $jsonIssues
 }
 
-function Run-ASoC-SetCommentForIssue($issueId,$inputComment){
+function Run-ASoC-SetCommentForIssue($scanId, $issueId, $inputComment){
   #Download Report
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Issues/$issueId"
-    Method      = 'Put'
+    Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanId"+"?odataFilter=Id%20eq%20"+$issueId
+    Method      = 'PUT'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -425,18 +424,16 @@ function Run-ASoC-SetCommentForIssue($issueId,$inputComment){
   #Write-Debug ($params | Format-Table | Out-String)
 
   $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) 
-  return $jsonOutput
+  return "Done"
 }
 
 #DELETE
 function Run-ASoC-SetBatchComments($scanId, $inputComment){
-  
 
-  #https://cloud.appscan.com/api/v2/Issues/Scan/9d989c39-70bf-ed11-ba76-14cb65723612?odataFilter=test&applyPolicies=None
 
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Issues/Scan/$issueId"+"applyPolicies=None"
-    Method      = 'Put'
+    Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanId"+"applyPolicies=None"
+    Method      = 'PUT'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -456,8 +453,8 @@ function Run-ASoC-GetScanDetails($scanId){
   #$latestScanExecutionId = ''
 
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Scans/$scanId"
-    Method      = 'Get'
+    Uri         = "$global:BaseAPIUrl/Scans/"+"?%24filter=Id%20eq%20"+$scanId
+    Method      = 'GET'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -466,7 +463,9 @@ function Run-ASoC-GetScanDetails($scanId){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  $jsonOutput = Invoke-RestMethod @params
+  $response = Invoke-RestMethod @params
+  $array = $response.Items
+  $jsonOutput = $array[0]
   #$latestScanExecutionId = $jsonOutput.LatestExecution.Id
   return $jsonOutput
 
@@ -524,7 +523,7 @@ function Run-ASoC-CreatePresence($presenceName){
   #CREATE PRESENCE
   $params = @{
     Uri         = "$global:BaseAPIUrl/Presences"
-    Method      = 'Post'
+    Method      = 'POST'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -548,8 +547,8 @@ function Run-ASoC-DownloadPresence($presenceId, $OutputFileName, $platform){
 
   #DOWNLOAD PRESENCE ZIP FILE
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Presences/"+$presenceId+"/DownloadV2?platform="+$platform
-    Method      = 'Post'
+    Uri         = "$global:BaseAPIUrl/Presences/"+$presenceId+"/Download/"+$platform
+    Method      = 'GET'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -570,7 +569,7 @@ function Run-ASoC-DeletePresence($presenceId){
 
   $params = @{
     Uri         = "$global:BaseAPIUrl/Presences/"+$presenceId
-    Method      = 'Delete'
+    Method      = 'DELETE'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -599,8 +598,8 @@ function Run-ASoC-DeletePresence($presenceId){
 function Run-ASoC-GetPresenceIdGivenPresenceName($presenceName){
 
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Presences/"
-    Method      = 'Get'
+    Uri         = "$global:BaseAPIUrl/Presences"
+    Method      = 'GET'
     Headers = @{
       Authorization = "Bearer $global:BearerToken"
       'Content-Type' = 'application/json'
@@ -610,8 +609,9 @@ function Run-ASoC-GetPresenceIdGivenPresenceName($presenceName){
   Write-Debug ($params | Format-Table | Out-String)
 
   $response = Invoke-RestMethod @params
+  $array = $response.Items
 
-  foreach($i in $response){
+  foreach($i in $array){
     if($i.PresenceName -eq $presenceName){
       return $i.Id
     }
@@ -622,8 +622,8 @@ function Run-ASoC-CheckPresenceStatus($presenceId){
 
     #CREATE PRESENCE
     $params = @{
-      Uri         = "$global:BaseAPIUrl/Presences/"+$presenceId
-      Method      = 'Get'
+      Uri         = "$global:BaseAPIUrl/Presences?%24filter=Id%20eq%20"+$presenceId
+      Method      = 'GET'
       Headers = @{
         Authorization = "Bearer $global:BearerToken"
         'Content-Type' = 'application/json'
@@ -632,13 +632,15 @@ function Run-ASoC-CheckPresenceStatus($presenceId){
     #DEBUG
     Write-Debug ($params | Format-Table | Out-String)
   
-    $jsonOutput = Invoke-RestMethod @params
+    $response = Invoke-RestMethod @params
+    $array = $response.Items
+    $jsonOutput = $array[0]
     
     if($jsonOutput.Status -eq 'Active'){
       Write-Host "AppScan Presence with ID: $presenceId is in active state. "
       return $true
     }else{
-      Write-Host "AppScan Presence with ID:" $presenceId "is NOT yet in active state. State =" $jsonOutput.Status
+      Write-Host "AppScan Presence with ID:" $presenceId "is NOT yet in active state. State =" $array.Status
       return $false
     }
 }
@@ -663,18 +665,20 @@ function Create-EphemeralPresenceWithDocker{
   $presenceId = Run-ASoC-CreatePresence($presenceName)
   $output = Run-ASoC-DownloadPresence $presenceId $presenceFileName $platform
 
-
   $dockerContainerName = 'appscanpresence_container'
   $dockerImageName = 'appscanpresence_image'
-  $dockerfileName = 'presence_dockerfile'
+  $dockerfileName = 'dockerfile'
 
   #Start presence in a container
   if ((docker ps -a --format '{{.Names}}') -contains $dockerContainerName) {
     docker stop $dockerContainerName
     docker rm $dockerContainerName
   }
+
+  Write-Host "Creating docker image..."
+  (docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .) 2>&1
   
-  docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .
+  Write-Host "Starting container..."
   docker run --name $dockerContainerName -d $dockerImageName
 
   #Pause for 5 seconds for the commands to complete
