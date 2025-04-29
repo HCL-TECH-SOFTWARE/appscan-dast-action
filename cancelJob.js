@@ -1,5 +1,5 @@
 /*************************************************************************** 
-* Copyright 2023 HCL America
+* Copyright 2023, 2025 HCL America
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -15,15 +15,16 @@
 */
 
 const core =require('@actions/core');
+const path = require('path');
 
 //console.log(process.env)
 var PSFileToRun = "cancelJob.ps1";
-process.env.GITHUB_ACTION_PATH = process.env.HOME+"/work/_actions/"+process.env.GITHUB_ACTION_REPOSITORY+"/"+process.env.GITHUB_ACTION_REF;
+process.env.GITHUB_ACTION_PATH = __dirname;
 
 console.log('Constructed github action path: '+process.env.GITHUB_ACTION_PATH)
 
 var spawn = require("child_process").spawn,child;
-child = spawn("pwsh",[process.env.GITHUB_ACTION_PATH+"/"+PSFileToRun]);
+child = spawn("pwsh", path.join(process.env.GITHUB_ACTION_PATH, PSFileToRun));
 child.stdout.on("data",function(data){
     process.stdout.write("" + data);
 });
