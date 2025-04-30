@@ -24,7 +24,7 @@ process.env.GITHUB_ACTION_PATH = __dirname;
 console.log('Constructed github action path: '+process.env.GITHUB_ACTION_PATH)
 
 var spawn = require("child_process").spawn,child;
-child = spawn("pwsh", path.join(process.env.GITHUB_ACTION_PATH, PSFileToRun));
+child = spawn("pwsh", [path.join(process.env.GITHUB_ACTION_PATH, PSFileToRun)]);
 child.stdout.on("data",function(data){
     process.stdout.write("" + data);
 });
