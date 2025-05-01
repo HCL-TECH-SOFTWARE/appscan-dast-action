@@ -29,7 +29,7 @@ $DebugPreference = 'SilentlyContinue'
 
 Write-Debug "Print environment variables:"
 Write-Host "github.sha: " $env:GITHUB_SHA
-ls -l
+ls -l .
 dir env:
 
 #[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
