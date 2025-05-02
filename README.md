@@ -99,7 +99,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run ASoC DAST Scan
-        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.6
+        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.7
         with:
           baseurl:  https://cloud.appscan.com
           asoc_key: ${{secrets.ASOC_KEY}}
@@ -133,7 +133,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run ASoC DAST Scan
-        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.6
+        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.7
         with:
           baseurl:  https://cloud.appscan.com
           asoc_key: ${{secrets.ASOC_KEY}}
@@ -164,7 +164,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run ASoC DAST Scan
-        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.6
+        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.7
         
         with:
           baseurl:  https://cloud.appscan.com
