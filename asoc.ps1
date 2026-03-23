@@ -25,11 +25,7 @@ $ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
 $global:SkipCert = $false
 
 if ($env:ACCEPTSSL -eq "true") {
-    Write-Host "ACCEPTSSL = true ? SSL validation will be ignored for AppScan 360"
     $global:SkipCert = $true
-}
-else {
-    Write-Host "SSL validation enabled (AppScan on Cloud / ASoC)"
 }
 
 # =================================
