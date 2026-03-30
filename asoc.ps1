@@ -1,4 +1,4 @@
-# Copyright 2023, 2024 HCL America
+# Copyright 2023, 2026 HCL America
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,21 @@ if($IsMacOS){
 }
 
 $ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
+
+# Handle SSL validation
+$global:SkipCert = $false
+
+if ($env:ACCEPTSSL -eq "true") {
+    $global:SkipCert = $true
+}
+
+# =================================
+# Base API URL
+# =================================
+
+$global:BaseAPIUrl = "$env:INPUT_BASEURL/api/v4"
+Write-Host "Using AppScan Base API URL: $global:BaseAPIUrl"
+
 
 Write-Host "Loading Library functions from asoc.ps1"
 
@@ -46,7 +61,12 @@ function Login-ASoC {
   Write-Debug ($params | Format-Table | Out-String)
 
 
-  $Members = Invoke-RestMethod @params
+  #$Members = Invoke-RestMethod @params
+  if ($global:SkipCert) {
+    $Members = Invoke-RestMethod @params -SkipCertificateCheck
+  } else {
+    $Members = Invoke-RestMethod @params
+  }
   Write-Debug ($Members | Format-Table | Out-String)
 
   #Write-Host "Auth successful - Token received: $Members.token"
@@ -83,7 +103,12 @@ function Lookup-ASoC-Application ($ApplicationName) {
           Authorization = "Bearer $global:BearerToken"
         }
       }
-  $Members = Invoke-RestMethod @params
+  #$Members = Invoke-RestMethod @params
+  if ($global:SkipCert) {
+    $Members = Invoke-RestMethod @params -SkipCertificateCheck
+  } else {
+    $Members = Invoke-RestMethod @params
+  }
   Write-Host @Members
   $Members.Items.Contains($ApplicationName)
 }
@@ -104,7 +129,12 @@ function Run-ASoC-FileUpload($filepath){
     'uploadedFile' = Get-Item -Path $filepath
    }
   }
-  $upload = Invoke-RestMethod @params
+  #$upload = Invoke-RestMethod @params
+  if ($global:SkipCert) {
+     $upload = Invoke-RestMethod @params -SkipCertificateCheck
+  } else {
+     $upload = Invoke-RestMethod @params
+  }
   $upload_File_ID = $upload.FileId
   write-host "File Uploaded - File ID: $upload_File_ID"
 
@@ -163,7 +193,12 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
   
-  $Members = Invoke-RestMethod @params
+  #$Members = Invoke-RestMethod @params
+  if ($global:SkipCert) {
+    $Members = Invoke-RestMethod @params -SkipCertificateCheck
+  } else {
+    $Members = Invoke-RestMethod @params
+  }
   return $Members.Id
 }
 
@@ -202,8 +237,13 @@ function Run-ASoC-ScanCompletionChecker($scanID){
   $waitIntervalInSeconds = 15
 
   while(($scan_status -ne "Ready") -and ($counterTimerInSeconds -lt $env:INPUT_WAIT_FOR_ANALYSIS_TIMEOUT_MINUTES*60)){
-    $output = Invoke-RestMethod @params
-    $scan_status = $output.Status
+    #$output = Invoke-RestMethod @params
+	if ($global:SkipCert) {
+		$output = Invoke-RestMethod @params -SkipCertificateCheck
+	} else {
+		$output = Invoke-RestMethod @params
+	}
+	$scan_status = $output.Status
     Start-Sleep -Seconds $waitIntervalInSeconds
     $counterTimerInSeconds = $counterTimerInSeconds + $waitIntervalInSeconds
     Write-Host "." -NoNewline
@@ -254,7 +294,12 @@ function Run-ASoC-GenerateReport ($scanID) {
   Write-Debug ($params | Format-Table | Out-String)
   Write-Debug ($body | Format-Table | Out-String)
 
-  $output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-Json)
+  #$output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-Json)
+  if ($global:SkipCert) {
+	$output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-Json) -SkipCertificateCheck
+  } else {
+	$output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-Json)
+  }
   $report_ID = $output_runreport.Id
   return $report_ID
 }
@@ -276,8 +321,13 @@ function Run-ASoC-ReportCompletionChecker($reportID){
 
   $report_status ="Not Ready"
   while($report_status -ne "Ready"){
-    $json = Invoke-RestMethod @params
-    $output = $json.Items[0]
+    #$json = Invoke-RestMethod @params
+    if ($global:SkipCert) {
+		$json = Invoke-RestMethod @params -SkipCertificateCheck
+    } else {
+		$json = Invoke-RestMethod @params
+    }
+	$output = $json.Items[0]
     $report_status = $output.Status
     Start-Sleep -Seconds 5
     Write-Host "Generating Report... Progress: " $output.Progress "%"
@@ -299,7 +349,12 @@ function Run-ASoC-DownloadReport($reportID){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  $output_runreport = Invoke-RestMethod @params
+  #$output_runreport = Invoke-RestMethod @params
+  if ($global:SkipCert) {
+	$output_runreport = Invoke-RestMethod @params -SkipCertificateCheck
+  } else {
+	$output_runreport = Invoke-RestMethod @params
+  }
   Out-File -InputObject $output_runreport -FilePath ".\AppScan_Security_Report - $env:GITHUB_SHA.html"
   
 }
@@ -319,8 +374,12 @@ function Run-ASoC-GetIssueCount($scanID, $policyScope){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  $jsonOutput = Invoke-RestMethod @params
-
+  #$jsonOutput = Invoke-RestMethod @params
+   if ($global:SkipCert) {
+	$jsonOutput = Invoke-RestMethod @params -SkipCertificateCheck
+  } else {
+	$jsonOutput = Invoke-RestMethod @params
+  }
   #DEBUG
   #$jsonOutput
 
@@ -403,7 +462,12 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  $jsonIssues = Invoke-RestMethod @params
+  #$jsonIssues = Invoke-RestMethod @params
+   if ($global:SkipCert) {
+	$jsonIssues = Invoke-RestMethod @params -SkipCertificateCheck
+  } else {
+	$jsonIssues = Invoke-RestMethod @params
+  }
   return $jsonIssues
 }
 
@@ -423,7 +487,12 @@ function Run-ASoC-SetCommentForIssue($scanId, $issueId, $inputComment){
   #DEBUG
   #Write-Debug ($params | Format-Table | Out-String)
 
-  $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) 
+  #$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) 
+   if ($global:SkipCert) {
+	$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) -SkipCertificateCheck
+  } else {
+	$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) 
+  }
   return "Done"
 }
 
@@ -445,7 +514,12 @@ function Run-ASoC-SetBatchComments($scanId, $inputComment){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) 
+  #$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) 
+   if ($global:SkipCert) {
+	$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) -SkipCertificateCheck
+  } else {
+	$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON)
+  }
   return $jsonOutput
 }
 function Run-ASoC-GetScanDetails($scanId){
@@ -463,7 +537,12 @@ function Run-ASoC-GetScanDetails($scanId){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  $response = Invoke-RestMethod @params
+  #$response = Invoke-RestMethod @params
+   if ($global:SkipCert) {
+	$response = Invoke-RestMethod @params -SkipCertificateCheck
+  } else {
+	$response = Invoke-RestMethod @params
+  }
   $array = $response.Items
   $jsonOutput = $array[0]
   #$latestScanExecutionId = $jsonOutput.LatestExecution.Id
@@ -485,7 +564,12 @@ function Run-ASoC-CancelScanExecution($executionId){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  $jsonOutput = Invoke-WebRequest @params
+  #$jsonOutput = Invoke-WebRequest @params
+   if ($global:SkipCert) {
+	$jsonOutput = Invoke-WebRequest @params -SkipCertificateCheck
+  } else {
+	$jsonOutput = Invoke-WebRequest @params
+  }
   Write-Debug $jsonOutput
   return $jsonOutput
 }
@@ -535,7 +619,12 @@ function Run-ASoC-CreatePresence($presenceName){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) 
+  #$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON)
+   if ($global:SkipCert) {
+	$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) -SkipCertificateCheck
+  } else {
+	$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON)
+  }
   
   $presenceId = $jsonOutput.Id
   return $presenceId
@@ -558,7 +647,12 @@ function Run-ASoC-DownloadPresence($presenceId, $OutputFileName, $platform){
   Write-Debug ($params | Format-Table | Out-String)
 
   $ProgressPreference = 'SilentlyContinue'
-  $jsonOutput = Invoke-WebRequest @params -OutFile $OutputFileName
+  #$jsonOutput = Invoke-WebRequest @params -OutFile $OutputFileName
+  if ($global:SkipCert) {
+		$jsonOutput = Invoke-WebRequest @params -OutFile $OutputFileName -SkipCertificateCheck
+  } else {
+		$jsonOutput = Invoke-WebRequest @params -OutFile $OutputFileName
+  }
   $ProgressPreference = 'Continue'
   
   return $jsonOutput
@@ -580,7 +674,12 @@ function Run-ASoC-DeletePresence($presenceId){
 
   $response = ""
   try {
-    $response = Invoke-WebRequest @params
+    #$response = Invoke-WebRequest @params
+	 if ($global:SkipCert) {
+		$response = Invoke-WebRequest @params -SkipCertificateCheck
+    } else {
+		$response = Invoke-WebRequest @params
+    }
     Write-Host "Successfully deleted presence with ID: $presenceId"
 
     
@@ -608,7 +707,12 @@ function Run-ASoC-GetPresenceIdGivenPresenceName($presenceName){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  $response = Invoke-RestMethod @params
+  #$response = Invoke-RestMethod @params
+   if ($global:SkipCert) {
+	$response = Invoke-RestMethod @params -SkipCertificateCheck
+  } else {
+	$response = Invoke-RestMethod @params
+  }
   $array = $response.Items
 
   foreach($i in $array){
@@ -632,7 +736,12 @@ function Run-ASoC-CheckPresenceStatus($presenceId){
     #DEBUG
     Write-Debug ($params | Format-Table | Out-String)
   
-    $response = Invoke-RestMethod @params
+    #$response = Invoke-RestMethod @params
+	 if ($global:SkipCert) {
+		$response = Invoke-RestMethod @params -SkipCertificateCheck
+    } else {
+		$response = Invoke-RestMethod @params
+    }
     $array = $response.Items
     $jsonOutput = $array[0]
     
