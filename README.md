@@ -78,7 +78,6 @@ If you don't have an account, register on [HCL AppScan on Cloud (ASoC)](https://
 | login_user                             |(applicable only if **login_method** = userpass) Type the username used for logging into the application|||
 | login_password                         |(applicable only if **login_method** = userpass) Type the password used logging into the application|||
 | login_sequence_file                    |Provide a path to the Login Traffic File data. Supported file type: DAST.CONFIG: AppScan Activity Recorder file|||
-| email_notification                     |Send email notification uponn scan completion| false                                  |true,false|
 | personal_scan                          | Make this a [personal scan](https://help.hcltechsw.com/appscan/ASoC/appseccloud_scans_personal.html). | false                                  | true, false|
 | wait_for_analysis                      |If set to true, the job will suspend and wait until DAST scan is complete before finishing the job| true                                   | true, false|
 | wait_for_analysis_timeout_minutes      |(applicable only if **wait_for_analysis** = true) Maximum duration in minutes before the job will no longer wait and proceeds to complete, default is 360 (6 hours)| 360                                    ||

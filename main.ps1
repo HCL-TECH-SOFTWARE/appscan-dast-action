@@ -84,6 +84,11 @@ $global:jsonBodyInPSObject = @{
   ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
 }
 
+# Check for email notification setting and display warning if enabled
+if ([System.Convert]::ToBoolean($env:INPUT_EMAIL_NOTIFICATION) -eq $true) {
+    Write-Warning "The email notification setting for scans is obsolete, but the scan continues normally. Manage email notifications in your AppScan on Cloud notification settings. To learn more, see the AppScan on Cloud documentation: Email notifications [https://help.hcl-software.com/appscan/ASoC/r_email_notifications.html]"
+}
+
 #LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1
 . "$env:GITHUB_ACTION_PATH/asoc.ps1"
 #MAIN
