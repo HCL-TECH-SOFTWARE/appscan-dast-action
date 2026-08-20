@@ -133,6 +133,5 @@ inputs:
 
 runs:
   using: 'node24'
-  main: 'main.js'
-  post: 'cancelJob.js'
-  post-if: cancelled()
+  main: 'dist/main/index.js'
+  post: 'dist/cancelJob/index.js'

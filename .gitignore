@@ -1,3 +1,4 @@
+node_modules/
 *.html
 testMain.ps1
 testResultProcessor.ps1

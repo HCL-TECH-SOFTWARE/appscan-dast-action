@@ -19,7 +19,7 @@ const path = require('path');
 
 //console.log(process.env)
 var PSFileToRun = "cancelJob.ps1";
-process.env.GITHUB_ACTION_PATH = __dirname;
+process.env['GITHUB_ACTION_PATH'] = path.resolve(__dirname, '../../');
 
 console.log('Constructed github action path: '+process.env.GITHUB_ACTION_PATH)
 
