@@ -90,12 +90,6 @@ inputs:
   login_sequence_file:
     description: 'Provide a path to the Login Traffic File data. Supported file type: CONFIG: AppScan Activity Recorder file'
     required: false
-    
-  #misc settings
-  email_notification:
-    description: 'Send email notification upon scan completion'
-    required: false
-    default: 'false'
 
   personal_scan:
     description: 'set to personal scan'
@@ -133,5 +127,9 @@ inputs:
 
 runs:
   using: 'node24'
+
+  # Main execution entrypoint: Launches main.ps1 to configure and trigger the DAST scan
   main: 'dist/main/index.js'
+
+  # Post-execution cleanup hook: Invokes cancelJob.ps1 to clean up presence containers and cancel jobs if aborted
   post: 'dist/cancelJob/index.js'
