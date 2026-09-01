@@ -1,5 +1,5 @@
 /*************************************************************************** 
-* Copyright 2023, 2025 HCL America
+* Copyright 2023, 2026 HCL America
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ const core =require('@actions/core');
 const path = require('path');
 
 var PSFileToRun = "main.ps1";
-process.env['GITHUB_ACTION_PATH'] = __dirname;
+process.env['GITHUB_ACTION_PATH'] = path.resolve(__dirname, '../../');
 
 console.log('Constructed github action path: '+process.env.GITHUB_ACTION_PATH)
 console.log('Starting URL in main.js: '+process.env.INPUT_STARTING_URL)

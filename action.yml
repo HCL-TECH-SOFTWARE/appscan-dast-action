@@ -1,4 +1,4 @@
-# Copyright 2023, 2024 HCL America
+# Copyright 2023, 2026 HCL America
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -90,12 +90,6 @@ inputs:
   login_sequence_file:
     description: 'Provide a path to the Login Traffic File data. Supported file type: CONFIG: AppScan Activity Recorder file'
     required: false
-    
-  #misc settings
-  email_notification:
-    description: 'Send email notification upon scan completion'
-    required: false
-    default: 'false'
 
   personal_scan:
     description: 'set to personal scan'
@@ -132,7 +126,10 @@ inputs:
     default: 'High'
 
 runs:
-  using: 'node20'
-  main: 'main.js'
-  post: 'cancelJob.js'
-  post-if: cancelled()
+  using: 'node24'
+
+  # Main execution entrypoint: Launches main.ps1 to configure and trigger the DAST scan
+  main: 'dist/main/index.js'
+
+  # Post-execution cleanup hook: Invokes cancelJob.ps1 to clean up presence containers and cancel jobs if aborted
+  post: 'dist/cancelJob/index.js'

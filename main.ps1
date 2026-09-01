@@ -1,4 +1,4 @@
-# Copyright 2023, 2024 HCL America
+# Copyright 2023, 2026 HCL America
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -76,12 +76,16 @@ $global:jsonBodyInPSObject = @{
   OnlyFullResults = $true
   FullyAutomatic = $true
   ScanName = $global:scan_name
-  EnableMailNotification = [System.Convert]::ToBoolean($env:INPUT_EMAIL_NOTIFICATION)
   Locale = 'en-US'
   AppId = $env:INPUT_APPLICATION_ID
   Execute = $true
   Personal = [System.Convert]::ToBoolean($env:INPUT_PERSONAL_SCAN)
   ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
+}
+
+# Check for email notification setting and display warning if enabled
+if ($env:INPUT_EMAIL_NOTIFICATION -and ($env:INPUT_EMAIL_NOTIFICATION.Trim().ToLower() -eq "true")) {
+    Write-Warning "The email notification setting for scans is obsolete, but the scan continues normally. Manage email notifications in your AppScan on Cloud notification settings. To learn more, see the AppScan on Cloud documentation: Email notifications [https://help.hcl-software.com/appscan/ASoC/r_email_notifications.html]"
 }
 
 #LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1
