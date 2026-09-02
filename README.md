@@ -85,6 +85,7 @@ If you don't have an account, register on [HCL AppScan on Cloud (ASoC)](https://
 | fail_by_severity                       |If **fail_by_severity** is set to true, failure_threshold must also be set. This will fail the job if any issues equal to or higher (more severe) than **failure_threshold** are found in the scan| false                                  |false|
 | failure_threshold                      |(applicable only if **failure_threshold** = true) Set the severity level that indicates a failure. Lesser severities will not be considered a failure. For example, if **failure_threshold** is set to Medium, Informational and/or Low severity issues will not cause a failure. Medium, High, and/or Critical issues will cause a failure.| High                                   |Informational, Low, Medium, High, Critical|
 | ephemeral_presence                     | If set to true, a temp instance of AppScan Presence will be deployed in the runner and will be used for the scan. When enabled, this will force **wait_for_analysis** to true and **network** to private regardless of user settings                                                                                                      | false                                  | true, false                              |
+| acceptssl                              | Allow connections to an AppScan 360 service with an untrusted certificate. Recommended for testing purposes only. | false | true, false
 
 # Example 1 - DAST scan with basic username and password login method, using the public network
 ```yaml

@@ -24,7 +24,7 @@ $ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
 # Handle SSL validation
 $global:SkipCert = $false
 
-if ($env:ACCEPTSSL -eq "true") {
+if ($env:INPUT_ACCEPTSSL -eq "true") {
     $global:SkipCert = $true
 }
 
