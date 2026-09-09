@@ -84,8 +84,8 @@ $global:jsonBodyInPSObject = @{
 }
 
 # Check for email notification setting and display warning if enabled
-if ($env:INPUT_EMAIL_NOTIFICATION -and ($env:INPUT_EMAIL_NOTIFICATION.Trim().ToLower() -eq "true")) {
-    Write-Warning "The email notification setting for scans is obsolete, but the scan continues normally. Manage email notifications in your AppScan on Cloud notification settings. To learn more, see the AppScan on Cloud documentation: Email notifications [https://help.hcl-software.com/appscan/ASoC/r_email_notifications.html]"
+if (Test-Path env:INPUT_EMAIL_NOTIFICATION) {
+    Write-Host "The email notification setting for scans is obsolete. Manage email notifications in your AppScan account settings. For more information see https://help.hcl-software.com/appscan/ASoC/r_email_notifications.html."
 }
 
 #LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1

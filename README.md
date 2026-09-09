@@ -181,3 +181,6 @@ jobs:
           path: '**/AppScan*.html'
         if: success() || failure()
 ```
+
+**Notes:**
+- Notifications are now managed via application-level profiles in your account settings. To ensure you receive alerts for this scan, verify your notification rules for this application or your global preferences. [Manage email notifications](https://help.hcl-software.com/appscan/ASoC/r_email_notifications.html).
