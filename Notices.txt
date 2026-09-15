@@ -1,0 +1,107 @@
+-----------------------
+Notices and Information
+-----------------------
+-------------------------------------
+HCL AppScan DAST GitHub Action v1.0.8
+-------------------------------------
+
+======
+DETAIL
+======
+Note: generic licenses are marked with (*)
+Note: missing copyright references are marked with (*)
+***************************************************************
+1. Library: core-1.11.1.tgz Product: AppScan_DAST_GitHub_Action
+***************************************************************
+========
+LICENSES
+========
+Licensed under MIT
+License terms can be found at: https://index.mend.io/gri/app/reader/resource/content/asString/eee42908-7e0c-498c-a3ab-644d7aaeb851
+
+License Text Under Appendix
+
+
+
+==========
+COPYRIGHTS
+==========
+Copyrighted under Copyright 2019 GitHub
+Copyright terms can be found at: https://index.mend.io/gri/app/reader/resource/content/asString/eee42908-7e0c-498c-a3ab-644d7aaeb851
+
+
+
+
+**************************************************************
+2. Library: exec-1.1.1.tgz Product: AppScan_DAST_GitHub_Action
+**************************************************************
+========
+LICENSES
+========
+Licensed under MIT
+License terms can be found at: https://index.mend.io/gri/app/reader/resource/content/asString/ae9a8ba7-fcb2-42f4-b7bf-e16b6657ae97
+
+License Text Under Appendix
+
+
+
+==========
+COPYRIGHTS
+==========
+Copyrighted under Copyright 2019 GitHub
+Copyright terms can be found at: https://index.mend.io/gri/app/reader/resource/content/asString/ae9a8ba7-fcb2-42f4-b7bf-e16b6657ae97
+
+
+
+
+**********************************************************************
+3. Library: recent-activity-v1.2.2 Product: AppScan_DAST_GitHub_Action
+**********************************************************************
+========
+LICENSES
+========
+Licensed under MIT
+License terms can be found at: https://github.com/Readme-Workflows/recent-activity/blob/v1.2.2/LICENSE
+
+License Text Under Appendix
+
+
+
+==========
+COPYRIGHTS
+==========
+--------------------
+Copyright 1 out of 2
+--------------------
+Copyrighted under Copyright 2020 James George
+Copyright terms can be found at: https://github.com/Readme-Workflows/recent-activity/blob/v1.2.2/LICENSE
+
+
+--------------------
+Copyright 2 out of 2
+--------------------
+Copyrighted under Copyright 2021 Abhishek Joshi and Puneet Gopinath
+Copyright terms can be found at: https://github.com/Readme-Workflows/recent-activity/blob/v1.2.2/LICENSE
+
+
+=========================
+APPENDIX: License Details
+=========================
+
+***
+MIT
+***
+License Text:
+The MIT License (MIT)
+
+Copyright 2019 GitHub
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
+
