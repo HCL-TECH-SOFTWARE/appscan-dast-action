@@ -48,26 +48,26 @@ Scan report (.html) is automatically generated and sent to github workflow overv
 
 # Usage
 ## Register
-If you don't have an account, register on [HCL AppScan on Cloud (ASoC) or HCL or AppScan 360° (AS360)](https://cloud.appscan.com/) to generate your API key and API secret.
+If you don't have an account, register on [HCL AppScan on Cloud (ASoC)](https://cloud.appscan.com/) to generate your API key and API secret. Not required for AppScan 360°.
 
 ## Setup
 1. Generate your API key and API secret on [the API page](https://cloud.appscan.com/main/apikey).
 - The API key and API secret map to the `asoc_key` and `asoc_secret` parameters for this action. Store the API key and API secret as [secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) in your repository.
 ![adingkeys_animation](img/keyAndSecret.gif)
-2. Create the application in ASoC or AS360. 
-- The application ID in ASoC maps to application_id for this action.
+2. Create the application in ASoC or AppScan 360°. 
+- The application ID in ASoC/AppScan 360° maps to application_id for this action.
 
 # Required Inputs
 | Name |   Description    |
 |    :---    |    :---    |
 | asoc_key | Your API key from [the API page](https://cloud.appscan.com/main/apikey) |
 | asoc_secret | Your API secret from [the API page](https://cloud.appscan.com/main/apikey) |
-| application_id | The ID of the application in ASoC. |
+| application_id | The ID of the application in ASoC or AppScan 360°.                                     |
 
 # Optional Inputs
-| Name                                   | Description | Default Value                          | Available options |
-|:---------------------------------------|    :---    |:---------------------------------------|    :---    |
-| scan_name                              | The name of the scan created in ASoC.                                                                                                                                                                                                                                                                                                        | The GitHub repository name + GITHUB SHA | |                                        |
+| Name                                   | Description                                                                                                                                                                                                                                                                                                                                  | Default Value                          | Available options |
+|:---------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------|    :---    |
+| scan_name                              | The name of the scan created in ASoC or AppScan 360°.                                                                                                                                                                                                                                                                                         | The GitHub repository name + GITHUB SHA | |                                        |
 | baseurl                                | Specify an AppScan on Cloud or AppScan 360° Server URL for the connection.                                                                                                                                                                                                                                                                   | https://cloud.appscan.com/              | |
 | dynamic_scan_type                      | Choose between dast or upload. DAST will require you to specify starting URL and login, while upload will only require you to specify a .scan or .scant file                                                                                                                                                                                 | dast                                    | dast, upload |
 | scan_or_scant_file                     | (applicable only if **dynamic_scan_type** = upload) Provide the path to the .scan or .scant file here                                                                                                                                                                                                                                        |                                         | |
@@ -98,9 +98,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v6
       - name: Run ASoC DAST Scan
-        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.7
+        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.8
         with:
           baseurl:  https://cloud.appscan.com
           asoc_key: ${{secrets.ASOC_KEY}}
@@ -114,7 +114,7 @@ jobs:
           network: public
           fail_for_noncompliance: false
           wait_for_analysis: true
-      - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.6.1
+      - uses: actions/upload-artifact@v6
         name: Upload HCL AppScan HTML Report to Github Artifacts
         with:
           name: AppScan Security Scan HTML Report 
@@ -132,9 +132,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v6
       - name: Run ASoC DAST Scan
-        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.7
+        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.8
         with:
           baseurl:  https://cloud.appscan.com
           asoc_key: ${{secrets.ASOC_KEY}}
@@ -146,7 +146,7 @@ jobs:
           presence_id: f185efda-67bf-ed11-ba76-14cb65723612
           fail_for_noncompliance: false
           wait_for_analysis: true
-      - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.6.1
+      - uses: actions/upload-artifact@v6
         name: Upload HCL AppScan HTML Report to Github Artifacts
         with:
           name: AppScan Security Scan HTML Report 
@@ -163,9 +163,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v6
       - name: Run ASoC DAST Scan
-        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.7
+        uses: HCL-TECH-SOFTWARE/appscan-dast-action@v1.0.8
         
         with:
           baseurl:  https://cloud.appscan.com
@@ -175,7 +175,7 @@ jobs:
           dynamic_scan_type: dast
           starting_URL: 'https://demo.testfire.net'
           ephemeral_presence: true
-      - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.6.1
+      - uses: actions/upload-artifact@v6
         name: Upload HCL AppScan HTML Report to Github Artifacts
         with:
           name: AppScan Security Scan HTML Report 
