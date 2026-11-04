@@ -19,7 +19,7 @@ if($IsMacOS){
   $Os = 'win'
 }
 
-$ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
+$ClientType = "github-dast-$Os-$version"
 
 # Handle SSL validation
 $global:SkipCert = $false
@@ -44,6 +44,7 @@ function Login-ASoC {
   $jsonBody = @{
     KeyId         = $env:INPUT_ASOC_KEY
     KeySecret     = $env:INPUT_ASOC_SECRET
+    ClientType    = $ClientType
   }
 
   $params = @{
@@ -53,7 +54,6 @@ function Login-ASoC {
       Headers = @{
           'Content-Type' = 'application/json'
           'accept' = 'application/json'
-          'ClientType' = "$ClientType"
         }
       }
   #DEBUG

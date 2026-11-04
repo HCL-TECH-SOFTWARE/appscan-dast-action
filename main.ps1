@@ -21,6 +21,8 @@ if($IsMacOS){
   $Os = 'win'
 }
 
+$version = 'v1.0.9'
+
 #DEBUG - To show DEBUG Messages, set $DebugPreference = 'Continue'
 
 
@@ -80,7 +82,7 @@ $global:jsonBodyInPSObject = @{
   AppId = $env:INPUT_APPLICATION_ID
   Execute = $true
   Personal = [System.Convert]::ToBoolean($env:INPUT_PERSONAL_SCAN)
-  ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
+  ClientType = "github-dast-$Os-$version"
 }
 
 # Check for email notification setting and display warning if enabled
