@@ -19,6 +19,8 @@ if($IsMacOS){
   $Os = 'win'
 }
 
+$version = 'v1.0.9'
+
 $ClientType = "github-dast-$Os-$version"
 
 # Handle SSL validation
