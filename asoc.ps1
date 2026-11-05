@@ -20,7 +20,6 @@ if($IsMacOS){
 }
 
 $version = 'v1.0.9'
-
 $ClientType = "github-dast-$Os-$version"
 
 # Handle SSL validation
@@ -187,7 +186,6 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
     Body        = $json
     Headers = @{
         'Content-Type' = 'application/json'
-        'ClientType' = "$ClientType"
         Authorization = "Bearer $global:BearerToken"
       }
     }
