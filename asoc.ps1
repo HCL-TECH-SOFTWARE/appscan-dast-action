@@ -19,7 +19,8 @@ if($IsMacOS){
   $Os = 'win'
 }
 
-$ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
+$version = 'v1.0.9'
+$ClientType = "github-dast-$Os-$version"
 
 # Handle SSL validation
 $global:SkipCert = $false
@@ -44,6 +45,7 @@ function Login-ASoC {
   $jsonBody = @{
     KeyId         = $env:INPUT_ASOC_KEY
     KeySecret     = $env:INPUT_ASOC_SECRET
+    ClientType    = $ClientType
   }
 
   $params = @{
@@ -53,7 +55,6 @@ function Login-ASoC {
       Headers = @{
           'Content-Type' = 'application/json'
           'accept' = 'application/json'
-          'ClientType' = "$ClientType"
         }
       }
   #DEBUG
@@ -185,7 +186,6 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
     Body        = $json
     Headers = @{
         'Content-Type' = 'application/json'
-        'ClientType' = "$ClientType"
         Authorization = "Bearer $global:BearerToken"
       }
     }

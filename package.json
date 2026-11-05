@@ -1,6 +1,6 @@
 {
   "name": "appscan-dast-action",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "HCL AppScan DAST GitHub Action",
   "main": "dist/main/index.js",
   "scripts": {
