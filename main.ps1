@@ -21,6 +21,9 @@ if($IsMacOS){
   $Os = 'win'
 }
 
+#LOAD ALL ASoC FUNCTIONS & VARIABLES FROM LIBRARY FILE asoc.ps1
+. "$env:GITHUB_ACTION_PATH/asoc.ps1"
+
 #DEBUG - To show DEBUG Messages, set $DebugPreference = 'Continue'
 
 
@@ -80,7 +83,7 @@ $global:jsonBodyInPSObject = @{
   AppId = $env:INPUT_APPLICATION_ID
   Execute = $true
   Personal = [System.Convert]::ToBoolean($env:INPUT_PERSONAL_SCAN)
-  ClientType = "github-dast-$Os-$env:GITHUB_ACTION_REF"
+  ClientType = $ClientType
 }
 
 # Check for email notification setting and display warning if enabled
@@ -88,8 +91,6 @@ if (Test-Path env:INPUT_EMAIL_NOTIFICATION) {
     Write-Host "The email notification setting for scans is obsolete. Manage email notifications in your AppScan account settings. For more information see https://help.hcl-software.com/appscan/ASoC/r_email_notifications.html."
 }
 
-#LOAD ALL ASOC FUNCTIONS FROM LIBRARY FILE asoc.ps1
-. "$env:GITHUB_ACTION_PATH/asoc.ps1"
 #MAIN
 Login-ASoC
 
