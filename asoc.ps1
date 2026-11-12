@@ -71,7 +71,7 @@ function Login-ASoC {
       $Members = Invoke-RestMethod @params -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while logging in to AppScan."
+    Write-Host "::error::An error occurred while logging in to AppScan."
     Exit 1
   }
   Write-Debug ($Members | Format-Table | Out-String)
@@ -82,7 +82,7 @@ function Login-ASoC {
   if($global:BearerToken -ne ""){
     Write-Host "Login successful"
   }else{
-    Write-Error "Login failed... exiting"
+    Write-Host "::error::Login failed... exiting"
     exit 1
   }
 
@@ -117,7 +117,7 @@ function Lookup-ASoC-Application ($ApplicationName) {
       $Members = Invoke-RestMethod @params -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while looking up the AppScan application."
+    Write-Host "::error::An error occurred while looking up the AppScan application."
     Exit 1
   }
   Write-Host @Members
@@ -147,7 +147,7 @@ function Run-ASoC-FileUpload($filepath){
       $upload = Invoke-RestMethod @params -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while uploading the file to AppScan."
+    Write-Host "::error::An error occurred while uploading the file to AppScan."
     Exit 1
   }
   $upload_File_ID = $upload.FileId
@@ -241,7 +241,7 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
     } else {
       Write-Host "Error creating scan." -ForegroundColor Red
     }
-    Write-Error "Scan creation Failed."
+    Write-Host "::error::Scan creation Failed."
     Exit 1
   }
 }
@@ -280,7 +280,7 @@ function Run-ASoC-ScanCompletionChecker($scanID){
   Write-Host "Waiting for Scan Completion..." -NoNewLine
   $waitIntervalInSeconds = 15
 
-  while(($scan_status -ne "Ready") -and ($counterTimerInSeconds -lt $env:INPUT_WAIT_FOR_ANALYSIS_TIMEOUT_MINUTES*60)){
+  while(($scan_status -ne "Ready") -and ($counterTimerInSeconds -lt [int]$env:INPUT_WAIT_FOR_ANALYSIS_TIMEOUT_MINUTES*60)){
     #$output = Invoke-RestMethod @params
     try {
       if ($global:SkipCert) {
@@ -301,7 +301,7 @@ function Run-ASoC-ScanCompletionChecker($scanID){
       } else {
         $apiError = $_.Exception.Message
       }
-      Write-Error "API Request Failed! Backend Response: $apiError"
+      Write-Host "::error::Scan completion check failed. $apiError"
       Exit 1
     }
 
@@ -313,7 +313,7 @@ function Run-ASoC-ScanCompletionChecker($scanID){
     if($scan_status -eq 'Failed'){
       $error_message = if (-not [string]::IsNullOrWhiteSpace($output.UserMessage)) { $output.UserMessage } else { $output.ErrorMessage }
       $scanOverviewPage = $env:INPUT_BASEURL + "/main/myapps/" + $env:INPUT_APPLICATION_ID + "/scans/" + $global:scanId
-      Write-Error "Scan status: $scan_status. Scan Message: $error_message. For More detail, see Execution log available at your scan view: $scanOverviewPage"
+      Write-Host "::error::Scan status: $scan_status. Scan Message: $error_message. For More detail, see Execution log available at your scan view: $scanOverviewPage"
       Exit 1
     }
   }
@@ -360,7 +360,7 @@ function Run-ASoC-GenerateReport ($scanID) {
       $output_runreport = Invoke-RestMethod @params -Body ($body | ConvertTo-Json) -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while generating the report."
+    Write-Host "::error::An error occurred while generating the report."
     Exit 1
   }
   $report_ID = $output_runreport.Id
@@ -392,7 +392,7 @@ function Run-ASoC-ReportCompletionChecker($reportID){
         $json = Invoke-RestMethod @params -ErrorAction Stop
       }
     } catch {
-      Write-Error "An error occurred while checking report completion."
+      Write-Host "::error::An error occurred while checking report completion."
       Exit 1
     }
     $output = $json.Items[0]
@@ -424,7 +424,7 @@ function Run-ASoC-DownloadReport($reportID){
       $output_runreport = Invoke-RestMethod @params -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while downloading the report."
+    Write-Host "::error::An error occurred while downloading the report."
     Exit 1
   }
   Out-File -InputObject $output_runreport -FilePath ".\AppScan_Security_Report - $env:GITHUB_SHA.html"
@@ -455,7 +455,7 @@ function Run-ASoC-GetIssueCount($scanID, $policyScope){
     }
     return $jsonOutput.Items
   } catch {
-    write-error "An error occurred while fetching issue count."
+    Write-Host "::error::An error occurred while fetching issue count."
     Exit 1
   }
 
@@ -543,7 +543,7 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
       $jsonIssues = Invoke-RestMethod @params -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while fetching issues from the scan."
+    Write-Host "::error::An error occurred while fetching issues from the scan."
     Exit 1
   }
   return $jsonIssues
@@ -572,7 +572,7 @@ function Run-ASoC-SetCommentForIssue($scanId, $issueId, $inputComment){
       $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody | ConvertTo-JSON) -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while setting the issue comment."
+    Write-Host "::error::An error occurred while setting the issue comment."
     Exit 1
   }
   return "Done"
@@ -603,7 +603,7 @@ function Run-ASoC-SetBatchComments($scanId, $inputComment){
       $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody | ConvertTo-JSON) -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while setting batch issue comments."
+    Write-Host "::error::An error occurred while setting batch issue comments."
     Exit 1
   }
   return $jsonOutput
@@ -630,7 +630,7 @@ function Run-ASoC-GetScanDetails($scanId){
       $response = Invoke-RestMethod @params -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while fetching scan details."
+    Write-Host "::error::An error occurred while fetching scan details."
     Exit 1
   }
   $array = $response.Items
@@ -661,7 +661,7 @@ function Run-ASoC-CancelScanExecution($executionId){
       $jsonOutput = Invoke-WebRequest @params -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while cancelling the scan execution."
+    Write-Host "::error::An error occurred while cancelling the scan execution."
     Exit 1
   }
   Write-Debug $jsonOutput
@@ -720,7 +720,7 @@ function Run-ASoC-CreatePresence($presenceName){
       $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody | ConvertTo-JSON) -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while creating the AppScan presence."
+    Write-Host "::error::An error occurred while creating the AppScan presence."
     Exit 1
   }
 
@@ -753,7 +753,7 @@ function Run-ASoC-DownloadPresence($presenceId, $OutputFileName, $platform){
       $jsonOutput = Invoke-WebRequest @params -OutFile $OutputFileName -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while downloading the AppScan presence."
+    Write-Host "::error::An error occurred while downloading the AppScan presence."
     Exit 1
   } finally {
     $ProgressPreference = 'Continue'
@@ -815,7 +815,7 @@ function Run-ASoC-GetPresenceIdGivenPresenceName($presenceName){
       $response = Invoke-RestMethod @params -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while fetching AppScan presences."
+    Write-Host "::error::An error occurred while fetching AppScan presences."
     Exit 1
   }
   $array = $response.Items
@@ -848,7 +848,7 @@ function Run-ASoC-CheckPresenceStatus($presenceId){
       $response = Invoke-RestMethod @params -ErrorAction Stop
     }
   } catch {
-    Write-Error "An error occurred while checking AppScan presence status."
+    Write-Host "::error::An error occurred while checking AppScan presence status."
     Exit 1
   }
   $array = $response.Items
@@ -925,7 +925,7 @@ function Create-EphemeralPresenceWithDocker{
     Write-Host "Ephemeral Presence is deployed and running"
     $global:ephemeralPresenceId = $presenceId
   }else{
-    Write-Error "Ephemeral Presence creation failed. Presence status = $presenceStatus"
+    Write-Host "::error::Ephemeral Presence creation failed. Presence status = $presenceStatus"
     exit 1
   }
 }
