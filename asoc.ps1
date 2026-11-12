@@ -19,14 +19,17 @@ if($IsMacOS){
   $Os = 'win'
 }
 
-$version = 'v1.0.9'
-$ClientType = "github-dast-$Os-$version"
-
 # Handle SSL validation
 $global:SkipCert = $false
-
 if ($env:INPUT_ACCEPTSSL -eq "true") {
-    $global:SkipCert = $true
+  $global:SkipCert = $true
+}
+
+$version = 'v1.0.9'
+if ($global:SkipCert) {
+    $ClientType = "github-dast-$version"
+} else {
+    $ClientType = "github-dast-$Os-$version"
 }
 
 # =================================
@@ -35,7 +38,6 @@ if ($env:INPUT_ACCEPTSSL -eq "true") {
 
 $global:BaseAPIUrl = "$env:INPUT_BASEURL/api/v4"
 Write-Host "Using AppScan Base API URL: $global:BaseAPIUrl"
-
 
 Write-Host "Loading Library functions from asoc.ps1"
 
@@ -49,24 +51,28 @@ function Login-ASoC {
   }
 
   $params = @{
-      Uri         = "$global:BaseAPIUrl/Account/ApiKeyLogin"
-      Method      = 'POST'
-      Body        = $jsonBody | ConvertTo-Json
-      Headers = @{
-          'Content-Type' = 'application/json'
-          'accept' = 'application/json'
-        }
-      }
+    Uri         = "$global:BaseAPIUrl/Account/ApiKeyLogin"
+    Method      = 'POST'
+    Body        = $jsonBody | ConvertTo-Json
+    Headers = @{
+      'Content-Type' = 'application/json'
+      'accept' = 'application/json'
+    }
+  }
   #DEBUG
   Write-Debug ($jsonBody | Format-Table | Out-String)
   Write-Debug ($params | Format-Table | Out-String)
 
 
-  #$Members = Invoke-RestMethod @params
-  if ($global:SkipCert) {
-    $Members = Invoke-RestMethod @params -SkipCertificateCheck
-  } else {
-    $Members = Invoke-RestMethod @params
+  try {
+    if ($global:SkipCert) {
+      $Members = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $Members = Invoke-RestMethod @params -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while logging in to AppScan."
+    Exit 1
   }
   Write-Debug ($Members | Format-Table | Out-String)
 
@@ -79,36 +85,40 @@ function Login-ASoC {
     Write-Error "Login failed... exiting"
     exit 1
   }
-  
+
 }
 
 function Set-AppScanPresence{
 
   if($env:INPUT_NETWORK -eq 'private'){
-    
+
     $global:jsonBodyInPSObject.Add("PresenceId",$env:INPUT_PRESENCE_ID)
-<# 
+    <#
     $global:jsonBodyInPSObject =+ @{
       PresenceId = $env:INPUT_PRESENCE_ID
-    } #> 
+    } #>
   }
 }
 
 function Lookup-ASoC-Application ($ApplicationName) {
 
   $params = @{
-      Uri         = "$env:INPUT_BASEURL/Apps"
-      Method      = 'GET'
-      Headers = @{
-          'Content-Type' = 'application/json'
-          Authorization = "Bearer $global:BearerToken"
-        }
-      }
-  #$Members = Invoke-RestMethod @params
-  if ($global:SkipCert) {
-    $Members = Invoke-RestMethod @params -SkipCertificateCheck
-  } else {
-    $Members = Invoke-RestMethod @params
+    Uri         = "$env:INPUT_BASEURL/Apps"
+    Method      = 'GET'
+    Headers = @{
+      'Content-Type' = 'application/json'
+      Authorization = "Bearer $global:BearerToken"
+    }
+  }
+  try {
+    if ($global:SkipCert) {
+      $Members = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $Members = Invoke-RestMethod @params -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while looking up the AppScan application."
+    Exit 1
   }
   Write-Host @Members
   $Members.Items.Contains($ApplicationName)
@@ -126,15 +136,19 @@ function Run-ASoC-FileUpload($filepath){
       'Content-Type' = 'multipart/form-data'
       Authorization = "Bearer $global:BearerToken"
     }
-     Form = @{
-    'uploadedFile' = Get-Item -Path $filepath
-   }
+    Form = @{
+      'uploadedFile' = Get-Item -Path $filepath
+    }
   }
-  #$upload = Invoke-RestMethod @params
-  if ($global:SkipCert) {
-     $upload = Invoke-RestMethod @params -SkipCertificateCheck
-  } else {
-     $upload = Invoke-RestMethod @params
+  try {
+    if ($global:SkipCert) {
+      $upload = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $upload = Invoke-RestMethod @params -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while uploading the file to AppScan."
+    Exit 1
   }
   $upload_File_ID = $upload.FileId
   write-host "File Uploaded - File ID: $upload_File_ID"
@@ -150,8 +164,8 @@ function Run-ASoC-DynamicAnalyzerUserPass{
   Write-Host "Proceeding with username and password login..." -ForegroundColor Green
 
   $Login = @{
-     'Username' = $env:INPUT_LOGIN_USER
-     'Password' = $env:INPUT_LOGIN_PASSWORD
+    'Username' = $env:INPUT_LOGIN_USER
+    'Password' = $env:INPUT_LOGIN_PASSWORD
   }
   $global:jsonBodyInPSObject.ScanConfiguration.Add('Login', $Login)
 
@@ -185,21 +199,51 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
     Method      = 'POST'
     Body        = $json
     Headers = @{
-        'Content-Type' = 'application/json'
-        Authorization = "Bearer $global:BearerToken"
-      }
+      'Content-Type' = 'application/json'
+      Authorization = "Bearer $global:BearerToken"
     }
+  }
 
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
-  
+
   #$Members = Invoke-RestMethod @params
-  if ($global:SkipCert) {
-    $Members = Invoke-RestMethod @params -SkipCertificateCheck
-  } else {
-    $Members = Invoke-RestMethod @params
+  try {
+    if ($global:SkipCert) {
+      $Members = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
+    }
+    else {
+      $Members = Invoke-RestMethod @params -ErrorAction Stop
+    }
+    return $Members.Id
   }
-  return $Members.Id
+  catch {
+    $responseBody = $_.ErrorDetails.Message
+
+    if ($responseBody) {
+      try {
+        $errorJson = $responseBody | ConvertFrom-Json
+        if ($errorJson.Message) {
+          $errorMessage = $errorJson.Message
+          if ($errorJson.FormatParams) {
+            for ($i = 0; $i -lt $errorJson.FormatParams.Count; $i++) {
+              $errorMessage = $errorMessage.Replace("{$i}", [string]$errorJson.FormatParams[$i])
+            }
+          }
+          Write-Host $errorMessage -ForegroundColor Red
+        } else {
+          Write-Host "Error fetching response body for scan." -ForegroundColor Red
+        }
+      }
+      catch {
+        Write-Host "Error submitting scan to the analysis service. " -ForegroundColor Red
+      }
+    } else {
+      Write-Host "Error creating scan." -ForegroundColor Red
+    }
+    Write-Error "Scan creation Failed."
+    Exit 1
+  }
 }
 
 function Run-ASoC-DAST{
@@ -207,8 +251,8 @@ function Run-ASoC-DAST{
   #FIRST check if dynamic_scan_type is 'upload' or 'dast'
   if($env:INPUT_DYNAMIC_SCAN_TYPE -eq 'upload'){
     return Run-ASoC-DynamicAnalyzerWithFile
-  
-  #If dynamic_scan_type is not 'upload' then it is a regular 'dast' scan. We proceed to check if it's a userpass login or recorded login
+
+    #If dynamic_scan_type is not 'upload' then it is a regular 'dast' scan. We proceed to check if it's a userpass login or recorded login
   }elseif($env:INPUT_LOGIN_METHOD -eq 'userpass'){
     return Run-ASoC-DynamicAnalyzerUserPass
 
@@ -238,25 +282,40 @@ function Run-ASoC-ScanCompletionChecker($scanID){
 
   while(($scan_status -ne "Ready") -and ($counterTimerInSeconds -lt $env:INPUT_WAIT_FOR_ANALYSIS_TIMEOUT_MINUTES*60)){
     #$output = Invoke-RestMethod @params
-	if ($global:SkipCert) {
-		$output = Invoke-RestMethod @params -SkipCertificateCheck
-	} else {
-		$output = Invoke-RestMethod @params
-	}
-	$scan_status = $output.Status
+    try {
+      if ($global:SkipCert) {
+        $output = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
+      } else {
+        $output = Invoke-RestMethod @params -ErrorAction Stop
+      }
+    } catch {
+      Write-Host "" # Breaks the dot-printing line cleanly
+
+      # Universally compatible error extraction (Supports both modern pwsh and legacy Windows PowerShell 5.1)
+      if ($null -ne $_.ErrorDetails) {
+        $apiError = $_.ErrorDetails.Message
+      } elseif ($null -ne $_.Exception.Response) {
+        $responseStream = $_.Exception.Response.GetResponseStream()
+        $reader = New-Object System.IO.StreamReader($responseStream)
+        $apiError = $reader.ReadToEnd()
+      } else {
+        $apiError = $_.Exception.Message
+      }
+      Write-Error "API Request Failed! Backend Response: $apiError"
+      Exit 1
+    }
+
+    $scan_status = $output.Status
     Start-Sleep -Seconds $waitIntervalInSeconds
     $counterTimerInSeconds = $counterTimerInSeconds + $waitIntervalInSeconds
     Write-Host "." -NoNewline
 
     if($scan_status -eq 'Failed'){
-      $error_message = $output.UserMessage
+      $error_message = if (-not [string]::IsNullOrWhiteSpace($output.UserMessage)) { $output.UserMessage } else { $output.ErrorMessage }
       $scanOverviewPage = $env:INPUT_BASEURL + "/main/myapps/" + $env:INPUT_APPLICATION_ID + "/scans/" + $global:scanId
-
-      Write-Error "Scan status: $scan_status. Scan UserMessage: $error_message. For More detail, see Execution log available at your scan view: $scanOverviewPage"
-      
+      Write-Error "Scan status: $scan_status. Scan Message: $error_message. For More detail, see Execution log available at your scan view: $scanOverviewPage"
       Exit 1
     }
-
   }
   Write-Host ""
 }
@@ -294,11 +353,15 @@ function Run-ASoC-GenerateReport ($scanID) {
   Write-Debug ($params | Format-Table | Out-String)
   Write-Debug ($body | Format-Table | Out-String)
 
-  #$output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-Json)
-  if ($global:SkipCert) {
-	$output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-Json) -SkipCertificateCheck
-  } else {
-	$output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-Json)
+  try {
+    if ($global:SkipCert) {
+      $output_runreport = Invoke-RestMethod @params -Body ($body | ConvertTo-Json) -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $output_runreport = Invoke-RestMethod @params -Body ($body | ConvertTo-Json) -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while generating the report."
+    Exit 1
   }
   $report_ID = $output_runreport.Id
   return $report_ID
@@ -322,12 +385,17 @@ function Run-ASoC-ReportCompletionChecker($reportID){
   $report_status ="Not Ready"
   while($report_status -ne "Ready"){
     #$json = Invoke-RestMethod @params
-    if ($global:SkipCert) {
-		$json = Invoke-RestMethod @params -SkipCertificateCheck
-    } else {
-		$json = Invoke-RestMethod @params
+    try {
+      if ($global:SkipCert) {
+        $json = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
+      } else {
+        $json = Invoke-RestMethod @params -ErrorAction Stop
+      }
+    } catch {
+      Write-Error "An error occurred while checking report completion."
+      Exit 1
     }
-	$output = $json.Items[0]
+    $output = $json.Items[0]
     $report_status = $output.Status
     Start-Sleep -Seconds 5
     Write-Host "Generating Report... Progress: " $output.Progress "%"
@@ -349,52 +417,58 @@ function Run-ASoC-DownloadReport($reportID){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  #$output_runreport = Invoke-RestMethod @params
-  if ($global:SkipCert) {
-	$output_runreport = Invoke-RestMethod @params -SkipCertificateCheck
-  } else {
-	$output_runreport = Invoke-RestMethod @params
+  try {
+    if ($global:SkipCert) {
+      $output_runreport = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $output_runreport = Invoke-RestMethod @params -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while downloading the report."
+    Exit 1
   }
   Out-File -InputObject $output_runreport -FilePath ".\AppScan_Security_Report - $env:GITHUB_SHA.html"
-  
+
 }
 #policies options are 'All' or 'None'
 function Run-ASoC-GetIssueCount($scanID, $policyScope){
 
   #/api/v4/Issues/Scan/<scanID>?applyPolicies=all&$filter=status eq 'Open' or Status eq 'InProgress' or Status eq 'Reopened' &$apply=groupby((Status,Severity),aggregate($count as N))
   $params = @{
-      Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanID"+"?applyPolicies="+"$policyScope"+"&%24filter=Status%20eq%20%27Open%27%20or%20Status%20eq%20%27InProgress%27%20or%20Status%20eq%20%27Reopened%27&%24apply=groupby%28%28Status%2CSeverity%29%2Caggregate%28%24count%20as%20N%29%29"
-      Method      = 'GET'
-      Headers = @{
+    Uri         = "$global:BaseAPIUrl/Issues/Scan/$scanID"+"?applyPolicies="+"$policyScope"+"&%24filter=Status%20eq%20%27Open%27%20or%20Status%20eq%20%27InProgress%27%20or%20Status%20eq%20%27Reopened%27&%24apply=groupby%28%28Status%2CSeverity%29%2Caggregate%28%24count%20as%20N%29%29"
+    Method      = 'GET'
+    Headers = @{
       'Content-Type' = 'application/json'
       Authorization = "Bearer $global:BearerToken"
-      }
+    }
   }
-  
+
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  #$jsonOutput = Invoke-RestMethod @params
-   if ($global:SkipCert) {
-	$jsonOutput = Invoke-RestMethod @params -SkipCertificateCheck
-  } else {
-	$jsonOutput = Invoke-RestMethod @params
+  try {
+    #$jsonOutput = Invoke-RestMethod @params
+    if ($global:SkipCert) {
+      $jsonOutput = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $jsonOutput = Invoke-RestMethod @params -ErrorAction Stop
+    }
+    return $jsonOutput.Items
+  } catch {
+    write-error "An error occurred while fetching issue count."
+    Exit 1
   }
-  #DEBUG
-  #$jsonOutput
-
-  return $jsonOutput.Items
 
 }
 
 function FailBuild-ByNonCompliance($issueCountJson){
-  
+
   $failBuild = $false
   $totalIssues = 0
   foreach($i in $issueCountJson){
     $totalIssues = $totalIssues + $i.Count
   }
-  
+
   #DEBUG
   Write-Host "Total issues: $totalIssues"
   if($totalIssues -gt 0){
@@ -422,7 +496,7 @@ function FailBuild-BySeverity($issueCountJson, $failureThresholdText){
       $totalIssuesCountAboveThreshold = $totalIssuesCountAboveThreshold + $i.Count
     }
   }
-  
+
   #DEBUG
   Write-Host "Total count of issues above threshold: $totalIssuesCountAboveThreshold"
 
@@ -462,11 +536,15 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  #$jsonIssues = Invoke-RestMethod @params
-   if ($global:SkipCert) {
-	$jsonIssues = Invoke-RestMethod @params -SkipCertificateCheck
-  } else {
-	$jsonIssues = Invoke-RestMethod @params
+  try {
+    if ($global:SkipCert) {
+      $jsonIssues = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $jsonIssues = Invoke-RestMethod @params -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while fetching issues from the scan."
+    Exit 1
   }
   return $jsonIssues
 }
@@ -487,11 +565,15 @@ function Run-ASoC-SetCommentForIssue($scanId, $issueId, $inputComment){
   #DEBUG
   #Write-Debug ($params | Format-Table | Out-String)
 
-  #$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) 
-   if ($global:SkipCert) {
-	$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) -SkipCertificateCheck
-  } else {
-	$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) 
+  try {
+    if ($global:SkipCert) {
+      $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody | ConvertTo-JSON) -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody | ConvertTo-JSON) -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while setting the issue comment."
+    Exit 1
   }
   return "Done"
 }
@@ -514,16 +596,20 @@ function Run-ASoC-SetBatchComments($scanId, $inputComment){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  #$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) 
-   if ($global:SkipCert) {
-	$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) -SkipCertificateCheck
-  } else {
-	$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON)
+  try {
+    if ($global:SkipCert) {
+      $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody | ConvertTo-JSON) -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody | ConvertTo-JSON) -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while setting batch issue comments."
+    Exit 1
   }
   return $jsonOutput
 }
 function Run-ASoC-GetScanDetails($scanId){
-  
+
   #$latestScanExecutionId = ''
 
   $params = @{
@@ -537,11 +623,15 @@ function Run-ASoC-GetScanDetails($scanId){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  #$response = Invoke-RestMethod @params
-   if ($global:SkipCert) {
-	$response = Invoke-RestMethod @params -SkipCertificateCheck
-  } else {
-	$response = Invoke-RestMethod @params
+  try {
+    if ($global:SkipCert) {
+      $response = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $response = Invoke-RestMethod @params -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while fetching scan details."
+    Exit 1
   }
   $array = $response.Items
   $jsonOutput = $array[0]
@@ -564,11 +654,15 @@ function Run-ASoC-CancelScanExecution($executionId){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  #$jsonOutput = Invoke-WebRequest @params
-   if ($global:SkipCert) {
-	$jsonOutput = Invoke-WebRequest @params -SkipCertificateCheck
-  } else {
-	$jsonOutput = Invoke-WebRequest @params
+  try {
+    if ($global:SkipCert) {
+      $jsonOutput = Invoke-WebRequest @params -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $jsonOutput = Invoke-WebRequest @params -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while cancelling the scan execution."
+    Exit 1
   }
   Write-Debug $jsonOutput
   return $jsonOutput
@@ -588,7 +682,7 @@ function Delete-LatestRunningScanExecution($scanId){
 
     $cancelStatus = Run-ASoC-CancelScanExecution($ExecutionId)
     Write-Debug $cancelStatus
-    
+
     if($cancelStatus.StatusCode -In 200..299){
       Write-Host "Latest Scan Execution with Execution ID: $ExecutionId is successfully cancelled."
     }else{
@@ -603,7 +697,7 @@ function Delete-LatestRunningScanExecution($scanId){
 
 #Epheremal presence related functions
 function Run-ASoC-CreatePresence($presenceName){
-  
+
   #CREATE PRESENCE
   $params = @{
     Uri         = "$global:BaseAPIUrl/Presences"
@@ -619,13 +713,17 @@ function Run-ASoC-CreatePresence($presenceName){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  #$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON)
-   if ($global:SkipCert) {
-	$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON) -SkipCertificateCheck
-  } else {
-	$jsonOutput = Invoke-RestMethod @params -Body ($jsonBody|ConvertTo-JSON)
+  try {
+    if ($global:SkipCert) {
+      $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody | ConvertTo-JSON) -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $jsonOutput = Invoke-RestMethod @params -Body ($jsonBody | ConvertTo-JSON) -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while creating the AppScan presence."
+    Exit 1
   }
-  
+
   $presenceId = $jsonOutput.Id
   return $presenceId
 
@@ -648,13 +746,19 @@ function Run-ASoC-DownloadPresence($presenceId, $OutputFileName, $platform){
 
   $ProgressPreference = 'SilentlyContinue'
   #$jsonOutput = Invoke-WebRequest @params -OutFile $OutputFileName
-  if ($global:SkipCert) {
-		$jsonOutput = Invoke-WebRequest @params -OutFile $OutputFileName -SkipCertificateCheck
-  } else {
-		$jsonOutput = Invoke-WebRequest @params -OutFile $OutputFileName
+  try {
+    if ($global:SkipCert) {
+      $jsonOutput = Invoke-WebRequest @params -OutFile $OutputFileName -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $jsonOutput = Invoke-WebRequest @params -OutFile $OutputFileName -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while downloading the AppScan presence."
+    Exit 1
+  } finally {
+    $ProgressPreference = 'Continue'
   }
-  $ProgressPreference = 'Continue'
-  
+
   return $jsonOutput
 }
 
@@ -672,25 +776,22 @@ function Run-ASoC-DeletePresence($presenceId){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  $response = ""
   try {
     #$response = Invoke-WebRequest @params
-	 if ($global:SkipCert) {
-		$response = Invoke-WebRequest @params -SkipCertificateCheck
+    if ($global:SkipCert) {
+      $response = Invoke-WebRequest @params -SkipCertificateCheck -ErrorAction Stop
     } else {
-		$response = Invoke-WebRequest @params
+      $response = Invoke-WebRequest @params -ErrorAction Stop
     }
     Write-Host "Successfully deleted presence with ID: $presenceId"
-
-    
   }
   catch {
-      Write-Host "Failed to delete presence with ID: $presenceId"
-      Write-Host "The request failed with error: $($_.Exception.Message)"
-      Write-Host "The request failed with HTTP status code $($response.StatusCode)"
-      Write-Host "The failure message is: $($response.StatusDescription)"
-    }
-  
+    Write-Host "Failed to delete presence with ID: $presenceId"
+    Write-Host "The request failed with error: $($_.Exception.Message)"
+    Write-Host "The request failed with HTTP status code $($response.StatusCode)"
+    Write-Host "The failure message is: $($response.StatusDescription)"
+  }
+
 }
 
 
@@ -707,11 +808,15 @@ function Run-ASoC-GetPresenceIdGivenPresenceName($presenceName){
   #DEBUG
   Write-Debug ($params | Format-Table | Out-String)
 
-  #$response = Invoke-RestMethod @params
-   if ($global:SkipCert) {
-	$response = Invoke-RestMethod @params -SkipCertificateCheck
-  } else {
-	$response = Invoke-RestMethod @params
+  try {
+    if ($global:SkipCert) {
+      $response = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
+    } else {
+      $response = Invoke-RestMethod @params -ErrorAction Stop
+    }
+  } catch {
+    Write-Error "An error occurred while fetching AppScan presences."
+    Exit 1
   }
   $array = $response.Items
 
@@ -724,34 +829,38 @@ function Run-ASoC-GetPresenceIdGivenPresenceName($presenceName){
 
 function Run-ASoC-CheckPresenceStatus($presenceId){
 
-    #CREATE PRESENCE
-    $params = @{
-      Uri         = "$global:BaseAPIUrl/Presences?%24filter=Id%20eq%20"+$presenceId
-      Method      = 'GET'
-      Headers = @{
-        Authorization = "Bearer $global:BearerToken"
-        'Content-Type' = 'application/json'
-      }
+  #CREATE PRESENCE
+  $params = @{
+    Uri         = "$global:BaseAPIUrl/Presences?%24filter=Id%20eq%20"+$presenceId
+    Method      = 'GET'
+    Headers = @{
+      Authorization = "Bearer $global:BearerToken"
+      'Content-Type' = 'application/json'
     }
-    #DEBUG
-    Write-Debug ($params | Format-Table | Out-String)
-  
-    #$response = Invoke-RestMethod @params
-	 if ($global:SkipCert) {
-		$response = Invoke-RestMethod @params -SkipCertificateCheck
+  }
+  #DEBUG
+  Write-Debug ($params | Format-Table | Out-String)
+
+  try {
+    if ($global:SkipCert) {
+      $response = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
     } else {
-		$response = Invoke-RestMethod @params
+      $response = Invoke-RestMethod @params -ErrorAction Stop
     }
-    $array = $response.Items
-    $jsonOutput = $array[0]
-    
-    if($jsonOutput.Status -eq 'Active'){
-      Write-Host "AppScan Presence with ID: $presenceId is in active state. "
-      return $true
-    }else{
-      Write-Host "AppScan Presence with ID:" $presenceId "is NOT yet in active state. State =" $array.Status
-      return $false
-    }
+  } catch {
+    Write-Error "An error occurred while checking AppScan presence status."
+    Exit 1
+  }
+  $array = $response.Items
+  $jsonOutput = $array[0]
+
+  if($jsonOutput.Status -eq 'Active'){
+    Write-Host "AppScan Presence with ID: $presenceId is in active state. "
+    return $true
+  }else{
+    Write-Host "AppScan Presence with ID:" $presenceId "is NOT yet in active state. State =" $array.Status
+    return $false
+  }
 }
 
 #Creates a ephemeral presence. Returns the presenceId if successful.
@@ -768,7 +877,7 @@ function Create-EphemeralPresenceWithDocker{
   if($presenceId){
     Run-ASoC-DeletePresence($presenceId)
   }
-  
+
 
   #CREATE A NEW PRESENCE
   $presenceId = Run-ASoC-CreatePresence($presenceName)
@@ -786,7 +895,7 @@ function Create-EphemeralPresenceWithDocker{
 
   Write-Host "Creating docker image..."
   (docker build -f $env:GITHUB_ACTION_PATH/$dockerfileName -t $dockerImageName .) 2>&1
-  
+
   Write-Host "Starting container..."
   docker run --name $dockerContainerName -d $dockerImageName
 
@@ -813,8 +922,8 @@ function Create-EphemeralPresenceWithDocker{
   }
 
   if($presenceStatus){
-      Write-Host "Ephemeral Presence is deployed and running"
-      $global:ephemeralPresenceId = $presenceId
+    Write-Host "Ephemeral Presence is deployed and running"
+    $global:ephemeralPresenceId = $presenceId
   }else{
     Write-Error "Ephemeral Presence creation failed. Presence status = $presenceStatus"
     exit 1
