@@ -27,9 +27,9 @@ if ($env:INPUT_ACCEPTSSL -eq "true") {
 
 $version = 'v1.0.9'
 if ($global:SkipCert) {
-    $ClientType = "github-dast-$version"
+  $ClientType = "github-dast-$version"
 } else {
-    $ClientType = "github-dast-$Os-$version"
+  $ClientType = "github-dast-$Os-$version"
 }
 
 # =================================
@@ -266,8 +266,8 @@ function Run-ASoC-DAST{
 
 function Run-ASoC-ScanCompletionChecker($scanID){
   $params = @{
-    Uri         = "$global:BaseAPIUrl/Scans/$scanID/Executions"
-    Method      = 'GET'
+    Uri = "$global:BaseAPIUrl/Scans/$scanID/Executions"
+    Method = 'GET'
     Headers = @{
       'Content-Type' = 'application/json'
       Authorization = "Bearer $global:BearerToken"
@@ -280,7 +280,7 @@ function Run-ASoC-ScanCompletionChecker($scanID){
   Write-Host "Waiting for Scan Completion..." -NoNewLine
   $waitIntervalInSeconds = 15
 
-  while(($scan_status -ne "Ready") -and ($counterTimerInSeconds -lt [int]$env:INPUT_WAIT_FOR_ANALYSIS_TIMEOUT_MINUTES*60)){
+  while (($scan_status -ne "Ready") -and ($counterTimerInSeconds -lt [int]$env:INPUT_WAIT_FOR_ANALYSIS_TIMEOUT_MINUTES * 60)) {
     #$output = Invoke-RestMethod @params
     try {
       if ($global:SkipCert) {
@@ -291,17 +291,33 @@ function Run-ASoC-ScanCompletionChecker($scanID){
     } catch {
       Write-Host "" # Breaks the dot-printing line cleanly
 
-      # Universally compatible error extraction (Supports both modern pwsh and legacy Windows PowerShell 5.1)
-      if ($null -ne $_.ErrorDetails) {
-        $apiError = $_.ErrorDetails.Message
-      } elseif ($null -ne $_.Exception.Response) {
-        $responseStream = $_.Exception.Response.GetResponseStream()
-        $reader = New-Object System.IO.StreamReader($responseStream)
-        $apiError = $reader.ReadToEnd()
-      } else {
-        $apiError = $_.Exception.Message
+      $responseBody = $_.ErrorDetails.Message
+      $apiErrorMsg = ""
+
+      # Attempt to cleanly parse the backend JSON error
+      if ($responseBody) {
+        try {
+          $errorJson = $responseBody | ConvertFrom-Json
+          if ($errorJson.Message) {
+            $apiErrorMsg = $errorJson.Message
+            if ($errorJson.FormatParams) {
+              for ($i = 0; $i -lt $errorJson.FormatParams.Count; $i++) {
+                $apiErrorMsg = $apiErrorMsg.Replace("{$i}", [string]$errorJson.FormatParams[$i])
+              }
+            }
+          }
+        }
+        catch {
+          # Ignore parsing errors, $apiErrorMsg remains empty
+        }
       }
-      Write-Host "::error::Scan completion check failed. $apiError"
+
+      if ($apiErrorMsg) {
+        Write-Host "::error::Scan completion check failed. Response: $apiErrorMsg"
+      }
+      else {
+        Write-Host "::error::Scan completion check failed."
+      }
       Exit 1
     }
 
@@ -310,7 +326,7 @@ function Run-ASoC-ScanCompletionChecker($scanID){
     $counterTimerInSeconds = $counterTimerInSeconds + $waitIntervalInSeconds
     Write-Host "." -NoNewline
 
-    if($scan_status -eq 'Failed'){
+    if ($scan_status -eq 'Failed') {
       $error_message = if (-not [string]::IsNullOrWhiteSpace($output.UserMessage)) { $output.UserMessage } else { $output.ErrorMessage }
       $scanOverviewPage = $env:INPUT_BASEURL + "/main/myapps/" + $env:INPUT_APPLICATION_ID + "/scans/" + $global:scanId
       Write-Host "::error::Scan status: $scan_status. Scan Message: $error_message. For More detail, see Execution log available at your scan view: $scanOverviewPage"
@@ -319,6 +335,7 @@ function Run-ASoC-ScanCompletionChecker($scanID){
   }
   Write-Host ""
 }
+
 function Run-ASoC-GenerateReport ($scanID) {
 
   $params = @{
@@ -399,7 +416,7 @@ function Run-ASoC-ReportCompletionChecker($reportID){
     $report_status = $output.Status
     Start-Sleep -Seconds 5
     Write-Host "Generating Report... Progress: " $output.Progress "%"
-  } 
+  }
 }
 
 function Run-ASoC-DownloadReport($reportID){
@@ -929,3 +946,4 @@ function Create-EphemeralPresenceWithDocker{
     exit 1
   }
 }
+
