@@ -63,7 +63,6 @@ function Login-ASoC {
   Write-Debug ($jsonBody | Format-Table | Out-String)
   Write-Debug ($params | Format-Table | Out-String)
 
-
   try {
     if ($global:SkipCert) {
       $Members = Invoke-RestMethod @params -SkipCertificateCheck -ErrorAction Stop
@@ -86,7 +85,6 @@ function Login-ASoC {
     Write-Error "Login failed... exiting"
     exit 1
   }
-
 }
 
 function Set-AppScanPresence{
@@ -124,7 +122,6 @@ function Lookup-ASoC-Application ($ApplicationName) {
   Write-Host @Members
   $Members.Items.Contains($ApplicationName)
 }
-
 
 function Run-ASoC-FileUpload($filepath){
 
@@ -219,6 +216,7 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
     return $Members.Id
   }
   catch {
+    Write-Host ""
     $responseBody = $_.ErrorDetails.Message
 
     if ($responseBody) {
@@ -307,16 +305,14 @@ function Run-ASoC-ScanCompletionChecker($scanID){
               }
             }
           }
-        }
-        catch {
+        } catch {
           # Ignore parsing errors, $apiErrorMsg remains empty
         }
       }
 
       if ($apiErrorMsg) {
         Write-Host "::error::Scan completion check failed. Response: $apiErrorMsg"
-      }
-      else {
+      } else {
         Write-Host "::error::Scan completion check failed."
       }
       Exit 1
