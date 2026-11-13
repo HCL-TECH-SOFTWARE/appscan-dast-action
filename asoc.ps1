@@ -327,10 +327,11 @@ function Run-ASoC-ScanCompletionChecker($scanID){
     Write-Host "." -NoNewline
 
     if ($scan_status -eq 'Failed') {
+      Write-Host ""
       $error_message = if (-not [string]::IsNullOrWhiteSpace($output.UserMessage)) { $output.UserMessage } else { $output.ErrorMessage }
       $scanOverviewPage = $env:INPUT_BASEURL + "/main/myapps/" + $env:INPUT_APPLICATION_ID + "/scans/" + $global:scanId
       Write-Host "::error::Scan status: $scan_status. Scan Message: $error_message. For More detail, see Execution log available at your scan view: $scanOverviewPage"
-      Exit 1
+      [Environment]::Exit(1)
     }
   }
   Write-Host ""
