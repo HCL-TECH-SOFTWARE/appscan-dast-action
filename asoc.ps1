@@ -83,6 +83,7 @@ function Login-ASoC {
     Write-Host "Login successful"
   }else{
     Write-Host "::error::Login failed... exiting"
+    Write-Error "Login failed... exiting"
     exit 1
   }
 
@@ -331,7 +332,8 @@ function Run-ASoC-ScanCompletionChecker($scanID){
       $error_message = if (-not [string]::IsNullOrWhiteSpace($output.UserMessage)) { $output.UserMessage } else { $output.ErrorMessage }
       $scanOverviewPage = $env:INPUT_BASEURL + "/main/myapps/" + $env:INPUT_APPLICATION_ID + "/scans/" + $global:scanId
       Write-Host "::error::Scan status: $scan_status. Scan Message: $error_message. For More detail, see Execution log available at your scan view: $scanOverviewPage"
-      [Environment]::Exit(1)
+      Write-Error "Scan failed. Please check the scan execution log for details."
+      Exit 1
     }
   }
   Write-Host ""
@@ -944,6 +946,7 @@ function Create-EphemeralPresenceWithDocker{
     $global:ephemeralPresenceId = $presenceId
   }else{
     Write-Host "::error::Ephemeral Presence creation failed. Presence status = $presenceStatus"
+    Write-Error "Ephemeral Presence creation failed. Presence status = $presenceStatus"
     exit 1
   }
 }
