@@ -241,6 +241,7 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
       Write-Host "Error creating scan." -ForegroundColor Red
     }
     Write-Host "::error::Scan creation Failed."
+    Write-Error "Scan creation Failed."
     Exit 1
   }
 }
@@ -279,7 +280,7 @@ function Run-ASoC-ScanCompletionChecker($scanID){
   Write-Host "Waiting for Scan Completion..." -NoNewLine
   $waitIntervalInSeconds = 15
 
-  while (($scan_status -ne "Ready") -and ($counterTimerInSeconds -lt [int]$env:INPUT_WAIT_FOR_ANALYSIS_TIMEOUT_MINUTES * 60)) {
+  while (($scan_status -ne "Ready") -and ($counterTimerInSeconds -lt ([int]$env:INPUT_WAIT_FOR_ANALYSIS_TIMEOUT_MINUTES * 60))) {
     #$output = Invoke-RestMethod @params
     try {
       if ($global:SkipCert) {
