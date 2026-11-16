@@ -236,14 +236,13 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
           }
           Write-Host $errorMessage -ForegroundColor Red
         } else {
-          Write-Host "Error fetching response body for scan." -ForegroundColor Red
+          Write-Host "::error::Error fetching response body for scan."
         }
-      }
-      catch {
-        Write-Host "Error submitting scan to the analysis service. " -ForegroundColor Red
+      } catch {
+        Write-Host "::error::Error submitting scan to the analysis service."
       }
     } else {
-      Write-Host "Error creating scan." -ForegroundColor Red
+      Write-Host "::error::Error creating scan."
     }
     Write-Host "::error::Scan creation Failed."
     Write-Error "Scan creation Failed." -ErrorAction Stop
