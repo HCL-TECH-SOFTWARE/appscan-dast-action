@@ -71,7 +71,7 @@ function Login-ASoC {
     }
   } catch {
     Write-Host "::error::An error occurred while logging in to AppScan."
-    Exit 1
+    Write-Error "Error occurred during login." -ErrorAction Stop
   }
   Write-Debug ($Members | Format-Table | Out-String)
 
@@ -82,8 +82,7 @@ function Login-ASoC {
     Write-Host "Login successful"
   }else{
     Write-Host "::error::Login failed... exiting"
-    Write-Error "Login failed... exiting"
-    exit 1
+    Write-Error "Login failed... exiting" -ErrorAction Stop
   }
 }
 
@@ -117,7 +116,7 @@ function Lookup-ASoC-Application ($ApplicationName) {
     }
   } catch {
     Write-Host "::error::An error occurred while looking up the AppScan application."
-    Exit 1
+    Write-Error "Error occurred while looking up the AppScan application." -ErrorAction Stop
   }
   Write-Host @Members
   $Members.Items.Contains($ApplicationName)
@@ -126,7 +125,12 @@ function Lookup-ASoC-Application ($ApplicationName) {
 function Run-ASoC-FileUpload($filepath){
 
   #ls -l
-  $uploadedFile = [IO.File]::ReadAllBytes($filepath)
+  try {
+    $fileItem = Get-Item -Path $filepath -ErrorAction Stop
+  } catch {
+    Write-Host "::error::An error occurred while reading the file to upload. Please check if the file exists and is accessible."
+    Write-Error "Failed to access the file for upload." -ErrorAction Stop
+  }
   $params = @{
     Uri         = "$global:BaseAPIUrl/FileUpload"
     Method      = 'Post'
@@ -135,7 +139,7 @@ function Run-ASoC-FileUpload($filepath){
       Authorization = "Bearer $global:BearerToken"
     }
     Form = @{
-      'uploadedFile' = Get-Item -Path $filepath
+      'uploadedFile' = $fileItem
     }
   }
   try {
@@ -146,13 +150,14 @@ function Run-ASoC-FileUpload($filepath){
     }
   } catch {
     Write-Host "::error::An error occurred while uploading the file to AppScan."
-    Exit 1
+    Write-Error "File upload failed." -ErrorAction Stop
   }
   $upload_File_ID = $upload.FileId
   write-host "File Uploaded - File ID: $upload_File_ID"
 
   return $upload_File_ID
 }
+
 function Run-ASoC-DynamicAnalyzerNoAuth {
   Write-Host "Proceeding with no authentications..." -ForegroundColor Green
 
@@ -241,8 +246,7 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
       Write-Host "Error creating scan." -ForegroundColor Red
     }
     Write-Host "::error::Scan creation Failed."
-    Write-Error "Scan creation Failed."
-    Exit 1
+    Write-Error "Scan creation Failed." -ErrorAction Stop
   }
 }
 
@@ -316,7 +320,7 @@ function Run-ASoC-ScanCompletionChecker($scanID){
       } else {
         Write-Host "::error::Scan completion check failed."
       }
-      Exit 1
+      Write-Error "Scan completion check failed." -ErrorAction Stop
     }
 
     $scan_status = $output.Status
@@ -329,8 +333,7 @@ function Run-ASoC-ScanCompletionChecker($scanID){
       $error_message = if (-not [string]::IsNullOrWhiteSpace($output.UserMessage)) { $output.UserMessage } else { $output.ErrorMessage }
       $scanOverviewPage = $env:INPUT_BASEURL + "/main/myapps/" + $env:INPUT_APPLICATION_ID + "/scans/" + $global:scanId
       Write-Host "::error::Scan status: $scan_status. Scan Message: $error_message. For More detail, see Execution log available at your scan view: $scanOverviewPage"
-      Write-Error "Scan failed. Please check the scan execution log for details."
-      Exit 1
+      Write-Error "Scan failed. Please check the scan execution log for details." -ErrorAction Stop
     }
   }
   Write-Host ""
@@ -378,7 +381,7 @@ function Run-ASoC-GenerateReport ($scanID) {
     }
   } catch {
     Write-Host "::error::An error occurred while generating the report."
-    Exit 1
+    Write-Error "Error occurred while generating the report." -ErrorAction Stop
   }
   $report_ID = $output_runreport.Id
   return $report_ID
@@ -410,7 +413,7 @@ function Run-ASoC-ReportCompletionChecker($reportID){
       }
     } catch {
       Write-Host "::error::An error occurred while checking report completion."
-      Exit 1
+        Write-Error "Error occurred while checking report completion." -ErrorAction Stop
     }
     $output = $json.Items[0]
     $report_status = $output.Status
@@ -442,7 +445,7 @@ function Run-ASoC-DownloadReport($reportID){
     }
   } catch {
     Write-Host "::error::An error occurred while downloading the report."
-    Exit 1
+    Write-Error "Error occurred while downloading the report." -ErrorAction Stop
   }
   Out-File -InputObject $output_runreport -FilePath ".\AppScan_Security_Report - $env:GITHUB_SHA.html"
 
@@ -473,7 +476,7 @@ function Run-ASoC-GetIssueCount($scanID, $policyScope){
     return $jsonOutput.Items
   } catch {
     Write-Host "::error::An error occurred while fetching issue count."
-    Exit 1
+    Write-Error "Error occurred while fetching issue count." -ErrorAction Stop
   }
 
 }
@@ -561,7 +564,7 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
     }
   } catch {
     Write-Host "::error::An error occurred while fetching issues from the scan."
-    Exit 1
+    Write-Error "Error occurred while fetching issues from the scan." -ErrorAction Stop
   }
   return $jsonIssues
 }
@@ -590,7 +593,7 @@ function Run-ASoC-SetCommentForIssue($scanId, $issueId, $inputComment){
     }
   } catch {
     Write-Host "::error::An error occurred while setting the issue comment."
-    Exit 1
+    Write-Error "Error occurred while setting the issue comment." -ErrorAction Stop
   }
   return "Done"
 }
@@ -621,7 +624,7 @@ function Run-ASoC-SetBatchComments($scanId, $inputComment){
     }
   } catch {
     Write-Host "::error::An error occurred while setting batch issue comments."
-    Exit 1
+    Write-Error "Error occurred while setting batch issue comments." -ErrorAction Stop
   }
   return $jsonOutput
 }
@@ -648,7 +651,7 @@ function Run-ASoC-GetScanDetails($scanId){
     }
   } catch {
     Write-Host "::error::An error occurred while fetching scan details."
-    Exit 1
+    Write-Error "Error occurred while fetching scan details." -ErrorAction Stop
   }
   $array = $response.Items
   $jsonOutput = $array[0]
@@ -679,7 +682,7 @@ function Run-ASoC-CancelScanExecution($executionId){
     }
   } catch {
     Write-Host "::error::An error occurred while cancelling the scan execution."
-    Exit 1
+    Write-Error "Error occurred while cancelling the scan execution." -ErrorAction Stop
   }
   Write-Debug $jsonOutput
   return $jsonOutput
@@ -738,7 +741,7 @@ function Run-ASoC-CreatePresence($presenceName){
     }
   } catch {
     Write-Host "::error::An error occurred while creating the AppScan presence."
-    Exit 1
+    Write-Error "Error occurred while creating the AppScan presence." -ErrorAction Stop
   }
 
   $presenceId = $jsonOutput.Id
@@ -771,7 +774,7 @@ function Run-ASoC-DownloadPresence($presenceId, $OutputFileName, $platform){
     }
   } catch {
     Write-Host "::error::An error occurred while downloading the AppScan presence."
-    Exit 1
+    Write-Error "Error occurred while downloading the AppScan presence." -ErrorAction Stop
   } finally {
     $ProgressPreference = 'Continue'
   }
@@ -833,7 +836,7 @@ function Run-ASoC-GetPresenceIdGivenPresenceName($presenceName){
     }
   } catch {
     Write-Host "::error::An error occurred while fetching AppScan presences."
-    Exit 1
+    Write-Error "Error occurred while fetching AppScan presence details." -ErrorAction Stop
   }
   $array = $response.Items
 
@@ -866,7 +869,7 @@ function Run-ASoC-CheckPresenceStatus($presenceId){
     }
   } catch {
     Write-Host "::error::An error occurred while checking AppScan presence status."
-    Exit 1
+    Write-Error "Error occurred while checking AppScan presence status." -ErrorAction Stop
   }
   $array = $response.Items
   $jsonOutput = $array[0]
@@ -943,8 +946,7 @@ function Create-EphemeralPresenceWithDocker{
     $global:ephemeralPresenceId = $presenceId
   }else{
     Write-Host "::error::Ephemeral Presence creation failed. Presence status = $presenceStatus"
-    Write-Error "Ephemeral Presence creation failed. Presence status = $presenceStatus"
-    exit 1
+    Write-Error "Ephemeral Presence creation failed. Presence status = $presenceStatus" -ErrorAction Stop
   }
 }
 
