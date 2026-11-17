@@ -116,7 +116,7 @@ function Lookup-ASoC-Application ($ApplicationName) {
     }
   } catch {
     Write-Host "::error::An error occurred while looking up the AppScan application."
-    Write-Error "Error occurred while looking up the AppScan application." -ErrorAction Stop
+    Write-Error "Error occurred while looking up the AppScan application."
   }
   Write-Host @Members
   $Members.Items.Contains($ApplicationName)
