@@ -42,7 +42,7 @@ Write-Host "Using AppScan Base API URL: $global:BaseAPIUrl"
 Write-Host "Loading Library functions from asoc.ps1"
 
 #FUNCTIONS
-function Invoke-ASoCRestMethod ($RequestParams) {
+function Invoke-ServerRestMethod ($RequestParams) {
   if ($global:SkipCert) {
     return Invoke-RestMethod @RequestParams -SkipCertificateCheck -ErrorAction Stop
   } else {
@@ -72,7 +72,7 @@ function Login-ASoC {
   Write-Debug ($params | Format-Table | Out-String)
 
   try {
-    $Members = Invoke-ASoCRestMethod -RequestParams $params
+    $Members = Invoke-ServerRestMethod -RequestParams $params
   } catch {
     Write-Host "::error::An error occurred while logging in to AppScan."
     Write-Error "Error occurred during login." -ErrorAction Stop
@@ -113,7 +113,7 @@ function Lookup-ASoC-Application ($ApplicationName) {
     }
   }
   try {
-    $Members = Invoke-ASoCRestMethod -RequestParams $params
+    $Members = Invoke-ServerRestMethod -RequestParams $params
   } catch {
     Write-Host "::error::An error occurred while looking up the AppScan application."
     Write-Error "Error occurred while looking up the AppScan application." -ErrorAction Stop
@@ -143,7 +143,7 @@ function Run-ASoC-FileUpload($filepath){
     }
   }
   try {
-    $upload = Invoke-ASoCRestMethod -RequestParams $params
+    $upload = Invoke-ServerRestMethod -RequestParams $params
   } catch {
     Write-Host "::error::An error occurred while uploading the file to AppScan."
     Write-Error "File upload failed." -ErrorAction Stop
@@ -208,7 +208,7 @@ function Run-ASoC-DynamicAnalyzerAPI($json){
 
   #$Members = Invoke-RestMethod @params
   try {
-    $Members = Invoke-ASoCRestMethod -RequestParams $params
+    $Members = Invoke-ServerRestMethod -RequestParams $params
     return $Members.Id
   }
   catch {
@@ -277,7 +277,7 @@ function Run-ASoC-ScanCompletionChecker($scanID){
   while (($scan_status -ne "Ready") -and ($counterTimerInSeconds -lt ([int]$env:INPUT_WAIT_FOR_ANALYSIS_TIMEOUT_MINUTES * 60))) {
     #$output = Invoke-RestMethod @params
     try {
-      $output = Invoke-ASoCRestMethod -RequestParams $params
+      $output = Invoke-ServerRestMethod -RequestParams $params
     } catch {
       Write-Host "" # Breaks the dot-printing line cleanly
 
@@ -392,7 +392,7 @@ function Run-ASoC-ReportCompletionChecker($reportID){
   while($report_status -ne "Ready"){
     #$json = Invoke-RestMethod @params
     try {
-      $json = Invoke-ASoCRestMethod -RequestParams $params
+      $json = Invoke-ServerRestMethod -RequestParams $params
     } catch {
       Write-Host "::error::An error occurred while checking report completion."
         Write-Error "Error occurred while checking report completion." -ErrorAction Stop
@@ -420,7 +420,7 @@ function Run-ASoC-DownloadReport($reportID){
   Write-Debug ($params | Format-Table | Out-String)
 
   try {
-    $output_runreport = Invoke-ASoCRestMethod -RequestParams $params
+    $output_runreport = Invoke-ServerRestMethod -RequestParams $params
   } catch {
     Write-Host "::error::An error occurred while downloading the report."
     Write-Error "Error occurred while downloading the report." -ErrorAction Stop
@@ -446,7 +446,7 @@ function Run-ASoC-GetIssueCount($scanID, $policyScope){
 
   try {
     #$jsonOutput = Invoke-RestMethod @params
-    $jsonOutput = Invoke-ASoCRestMethod -RequestParams $params
+    $jsonOutput = Invoke-ServerRestMethod -RequestParams $params
     return $jsonOutput.Items
   } catch {
     Write-Host "::error::An error occurred while fetching issue count."
@@ -531,7 +531,7 @@ function Run-ASoC-GetAllIssuesFromScan($scanId){
   Write-Debug ($params | Format-Table | Out-String)
 
   try {
-    $jsonIssues = Invoke-ASoCRestMethod -RequestParams $params
+    $jsonIssues = Invoke-ServerRestMethod -RequestParams $params
   } catch {
     Write-Host "::error::An error occurred while fetching issues from the scan."
     Write-Error "Error occurred while fetching issues from the scan." -ErrorAction Stop
@@ -614,7 +614,7 @@ function Run-ASoC-GetScanDetails($scanId){
   Write-Debug ($params | Format-Table | Out-String)
 
   try {
-    $response = Invoke-ASoCRestMethod -RequestParams $params
+    $response = Invoke-ServerRestMethod -RequestParams $params
   } catch {
     Write-Host "::error::An error occurred while fetching scan details."
     Write-Error "Error occurred while fetching scan details." -ErrorAction Stop
@@ -793,7 +793,7 @@ function Run-ASoC-GetPresenceIdGivenPresenceName($presenceName){
   Write-Debug ($params | Format-Table | Out-String)
 
   try {
-    $response = Invoke-ASoCRestMethod -RequestParams $params
+    $response = Invoke-ServerRestMethod -RequestParams $params
   } catch {
     Write-Host "::error::An error occurred while fetching AppScan presences."
     Write-Error "Error occurred while fetching AppScan presence details." -ErrorAction Stop
@@ -822,7 +822,7 @@ function Run-ASoC-CheckPresenceStatus($presenceId){
   Write-Debug ($params | Format-Table | Out-String)
 
   try {
-    $response = Invoke-ASoCRestMethod -RequestParams $params
+    $response = Invoke-ServerRestMethod -RequestParams $params
   } catch {
     Write-Host "::error::An error occurred while checking AppScan presence status."
     Write-Error "Error occurred while checking AppScan presence status." -ErrorAction Stop
